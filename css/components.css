@@ -203,19 +203,75 @@
   user-select: none;
 }
 
+/* Sci-Fi Medical HUD SVG Elements */
+.hud-svg-text {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 500;
+  fill: rgba(148, 163, 184, 0.45);
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
+.hud-svg-corner {
+  stroke: rgba(56, 189, 248, 0.35);
+  stroke-width: 1;
+  fill: none;
+}
+
+.hud-svg-grid-line {
+  stroke: rgba(148, 163, 184, 0.10);
+  stroke-width: 0.75;
+  stroke-dasharray: 2 4;
+}
+
+.hud-svg-orbit {
+  stroke: rgba(56, 189, 248, 0.16);
+  stroke-width: 0.75;
+  stroke-dasharray: 3 3;
+  fill: none;
+}
+
+.hud-svg-bone {
+  stroke: rgba(148, 163, 184, 0.22);
+  stroke-width: 0.85;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.hud-svg-rib {
+  stroke: rgba(148, 163, 184, 0.20);
+  stroke-width: 0.8;
+  stroke-dasharray: 4 2;
+  fill: none;
+}
+
+.hud-svg-muscle {
+  stroke: rgba(56, 189, 248, 0.15);
+  stroke-width: 0.65;
+  stroke-dasharray: 3 2;
+  fill: none;
+}
+
+.hud-svg-joint {
+  fill: none;
+  stroke: rgba(56, 189, 248, 0.35);
+  stroke-width: 0.8;
+}
+
 /* Body Wireframe Path */
 .body-contour {
   fill: rgba(56, 189, 248, 0.02);
-  stroke: rgba(148, 163, 184, 0.25);
-  stroke-width: 1.2;
-  stroke-dasharray: 4 2;
+  stroke: rgba(148, 163, 184, 0.28);
+  stroke-width: 1.1;
   transition: all var(--transition-normal);
 }
 
 .body-bone-structure {
-  stroke: rgba(148, 163, 184, 0.18);
-  stroke-width: 1;
+  stroke: rgba(148, 163, 184, 0.22);
+  stroke-width: 0.85;
   stroke-linecap: round;
+  fill: none;
 }
 
 /* Interactive Heat Zones */
@@ -229,27 +285,27 @@
 
 .zone-glow-shape {
   transition: all 0.22s ease;
-  stroke-width: 1.5;
+  stroke-width: 1.4;
 }
 
 /* Individual zone color presets */
 #zone-head .zone-glow-shape {
-  fill: rgba(56, 189, 248, 0.20);
+  fill: rgba(56, 189, 248, 0.16);
   stroke: var(--accent-blue);
 }
 
 #zone-chest .zone-glow-shape {
-  fill: rgba(52, 211, 153, 0.20);
+  fill: rgba(52, 211, 153, 0.16);
   stroke: var(--status-nominal);
 }
 
 #zone-abdomen .zone-glow-shape {
-  fill: rgba(251, 191, 36, 0.20);
+  fill: rgba(251, 191, 36, 0.16);
   stroke: var(--status-elevated);
 }
 
 #zone-knees .zone-glow-shape {
-  fill: rgba(251, 146, 60, 0.20);
+  fill: rgba(251, 146, 60, 0.16);
   stroke: var(--status-warning);
 }
 
@@ -257,39 +313,49 @@
 .heat-zone:hover .zone-glow-shape,
 .heat-zone.is-active .zone-glow-shape,
 .heat-zone:focus .zone-glow-shape {
-  fill-opacity: 0.55;
-  stroke-width: 2.2;
-  filter: drop-shadow(0 0 8px currentColor);
+  fill-opacity: 0.45;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 10px currentColor);
 }
 
 #zone-head:hover .zone-glow-shape,
 #zone-head.is-active .zone-glow-shape {
-  fill: rgba(56, 189, 248, 0.45);
+  fill: rgba(56, 189, 248, 0.40);
   stroke: #ffffff;
 }
 
 #zone-chest:hover .zone-glow-shape,
 #zone-chest.is-active .zone-glow-shape {
-  fill: rgba(52, 211, 153, 0.45);
+  fill: rgba(52, 211, 153, 0.40);
   stroke: #ffffff;
 }
 
 #zone-abdomen:hover .zone-glow-shape,
 #zone-abdomen.is-active .zone-glow-shape {
-  fill: rgba(251, 191, 36, 0.45);
+  fill: rgba(251, 191, 36, 0.40);
   stroke: #ffffff;
 }
 
 #zone-knees:hover .zone-glow-shape,
 #zone-knees.is-active .zone-glow-shape {
-  fill: rgba(251, 146, 60, 0.45);
+  fill: rgba(251, 146, 60, 0.40);
   stroke: #ffffff;
 }
 
 /* Target Reticles / Crosshairs on Zones */
 .zone-marker {
-  fill: var(--accent-blue);
+  fill: currentColor;
   opacity: 0.9;
+}
+
+@keyframes zone-marker-pulse-anim {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(1.18); }
+}
+
+.zone-marker-pulse {
+  transform-origin: center;
+  animation: zone-marker-pulse-anim 3s infinite ease-in-out;
 }
 
 
