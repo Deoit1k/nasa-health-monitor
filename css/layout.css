@@ -1,0 +1,454 @@
+/**
+ * NASA BIOMEDICAL TELEMETRY CORE
+ * Layout & Grid Architecture — Clean Deep Dark Theme
+ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-space);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Page Background: Noble Deep Graphite (#080c14) with Gentle Cosmic Tint */
+body {
+  background-color: var(--bg-space);
+  background-image: 
+    radial-gradient(circle at 50% 12%, rgba(56, 189, 248, 0.03) 0%, transparent 55%),
+    radial-gradient(circle at 85% 85%, rgba(248, 113, 113, 0.02) 0%, transparent 45%),
+    linear-gradient(rgba(148, 163, 184, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+  background-attachment: fixed;
+}
+
+/* Attenuated Scanline Layer (Maximum 0.02 Opacity — No Ripple/Flicker) */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15) 0px,
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  z-index: 999;
+  opacity: 0.02;
+}
+
+/* Clean Minimal Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-space);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: var(--radius-sm);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-blue);
+}
+
+/* Master Dashboard Container */
+.hud-wrapper {
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 20px 24px 36px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* ==========================================================================
+   Header Architecture
+   ========================================================================== */
+.hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 22px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--accent-blue);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.hud-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nasa-logo-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: var(--accent-blue-dim);
+  color: var(--accent-blue);
+  font-family: var(--font-brand);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  border-radius: var(--radius-sm);
+}
+
+.hud-header-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hud-header-title h1 {
+  font-family: var(--font-body);
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: 0.75px;
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+
+.hud-header-subtitle {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  color: var(--text-secondary);
+}
+
+.hud-header-telemetry-meta {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.meta-label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.meta-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+}
+
+.status-pill-nominal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  background: var(--status-nominal-dim);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  color: var(--status-nominal);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+.status-pill-nominal::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background-color: var(--status-nominal);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--status-nominal);
+  animation: pulse-dot 2.5s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+/* ==========================================================================
+   Grid Layouts
+   ========================================================================== */
+/* Top Vitals Bar (4 Metric Cards) */
+.hud-vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* Main Two-Column Row */
+main.hud-main-grid,
+.hud-main-grid {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 20px;
+  align-items: stretch;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Bottom Split Row: Simulation & Protocols */
+.hud-bottom-grid {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 20px;
+}
+
+/* ==========================================================================
+   HUD Panel Framing (Calm, Non-Aggressive Surfaces)
+   ========================================================================== */
+.hud-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-normal);
+}
+
+.hud-panel:hover {
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+.hud-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-surface-elevated);
+}
+
+.hud-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.75px;
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+
+.hud-panel-title h2 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.75px;
+}
+
+.hud-panel-title .title-icon {
+  color: var(--accent-blue);
+  font-size: 0.95rem;
+}
+
+.hud-panel-tag {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+}
+
+.hud-panel-body {
+  padding: 18px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--bg-surface);
+}
+
+/* Charts Column Layout */
+.charts-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.chart-card {
+  min-height: 250px;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+@media (max-width: 1280px) {
+  .hud-main-grid {
+    grid-template-columns: 400px 1fr;
+  }
+  .hud-bottom-grid {
+    grid-template-columns: 400px 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .hud-vitals-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .hud-main-grid {
+    grid-template-columns: 1fr;
+  }
+  .hud-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile Screens (max-width: 768px) */
+@media (max-width: 768px) {
+  .hud-wrapper {
+    padding: 12px 10px 24px 10px;
+    gap: 16px;
+    overflow-x: hidden;
+  }
+
+  main.hud-main-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    overflow-x: hidden;
+  }
+
+  .hud-bottom-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .hud-vitals-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* Header adjustments for mobile */
+  .hud-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .hud-header-brand {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .hud-header-title {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .hud-header-title h1 {
+    font-size: clamp(1.1rem, 5vw, 1.35rem);
+    letter-spacing: 0.5px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    line-height: 1.25;
+  }
+
+  .hud-header-subtitle {
+    font-size: 12px;
+    letter-spacing: 0.3px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    line-height: 1.4;
+    margin-top: 2px;
+  }
+
+  /* Metadata in 1 column or flex-wrap stack */
+  .hud-header-telemetry-meta {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 12px;
+  }
+
+  .hud-header-telemetry-meta .meta-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .meta-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.4px;
+  }
+
+  .meta-value {
+    font-size: 13px;
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 480px) {
+  .hud-wrapper {
+    padding: 8px 8px 20px 8px;
+    gap: 12px;
+  }
+
+  .hud-panel-header {
+    padding: 10px 12px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .hud-panel-body {
+    padding: 12px 10px;
+  }
+}

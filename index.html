@@ -1,0 +1,611 @@
+﻿<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
+  <title>NASA // Biomedical Telemetry Core</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
+
+  <!-- Modular CSS Architecture -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Floating HUD Tooltip (Positioned strictly left of cursor) -->
+  <div id="silhouette-tooltip" class="hud-tooltip" role="tooltip" aria-hidden="true">
+    <div class="tooltip-header">
+      <span id="tooltip-zone-title" class="tooltip-title">ZONE TELEMETRY</span>
+      <span id="tooltip-zone-status" class="tooltip-badge status-nominal">NOMINAL</span>
+    </div>
+    <div class="tooltip-row">
+      <span class="label">BIOMECH LOAD:</span>
+      <span id="tooltip-zone-load" class="val">24%</span>
+    </div>
+    <div class="tooltip-row">
+      <span class="label">LOCAL TEMP:</span>
+      <span id="tooltip-zone-temp" class="val">36.8 °C</span>
+    </div>
+    <div class="tooltip-row">
+      <span class="label">PERFUSION:</span>
+      <span class="val" style="color: var(--accent-blue);">OPTIMAL</span>
+    </div>
+  </div>
+
+  <div class="hud-wrapper">
+    <!-- ====================================================================
+         HUD Header Bar
+         ==================================================================== -->
+    <header class="hud-header">
+      <div class="hud-header-brand">
+        <span class="nasa-logo-badge">NASA</span>
+        <div class="hud-header-title">
+          <h1>TELEMETRY CORE</h1>
+          <span class="hud-header-subtitle">DEEP SPACE BIOMEDICAL LIFE SUPPORT SYSTEM // ARTEMIS VITAL MATRIX</span>
+        </div>
+      </div>
+
+      <div class="hud-header-telemetry-meta">
+        <div class="meta-item">
+          <span class="meta-label">MISSION ELAPSED TIME</span>
+          <span class="meta-value">MET T+184:14:32</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">SUBJECT ID</span>
+          <span class="meta-value">ASTRO-04 // C. VANCE</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">TELEMETRY LINK</span>
+          <span class="status-pill-nominal">DSN-LOCK 99.8%</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ====================================================================
+         Top Vital Metrics Row (Mandatory IDs)
+         ==================================================================== -->
+    <section class="hud-vitals-grid" aria-label="Astronaut Vital Signs">
+      <!-- Heart Rate Card -->
+      <article class="vital-card">
+        <div class="vital-card-top">
+          <div class="vital-label-group">
+            <span class="vital-label">HEART RATE</span>
+            <span class="vital-code">CARDIO-ECG / BPM</span>
+          </div>
+          <span id="status-heart-rate" class="vital-status-pill status-nominal">NOMINAL</span>
+        </div>
+        <div class="vital-value-wrap">
+          <span id="val-heart-rate" class="vital-value">72</span>
+          <span class="vital-unit">BPM</span>
+        </div>
+        <div class="vital-bar">
+          <div class="vital-bar-fill" style="width: 68%;"></div>
+        </div>
+      </article>
+
+      <!-- Radiation Dose Card -->
+      <article class="vital-card">
+        <div class="vital-card-top">
+          <div class="vital-label-group">
+            <span class="vital-label">RADIATION EXPOSURE</span>
+            <span class="vital-code">ACCUMULATED / mSv</span>
+          </div>
+          <span id="status-radiation" class="vital-status-pill status-elevated">ELEVATED</span>
+        </div>
+        <div class="vital-value-wrap">
+          <span id="val-radiation" class="vital-value">0.42</span>
+          <span class="vital-unit">mSv/h</span>
+        </div>
+        <div class="vital-bar">
+          <div class="vital-bar-fill warn" style="width: 52%;"></div>
+        </div>
+      </article>
+
+      <!-- Bone Mineral Density Card -->
+      <article class="vital-card">
+        <div class="vital-card-top">
+          <div class="vital-label-group">
+            <span class="vital-label">BONE MINERAL DENSITY</span>
+            <span class="vital-code">MICROGRAVITY / %</span>
+          </div>
+          <span id="status-bone-mass" class="vital-status-pill status-nominal">STABLE</span>
+        </div>
+        <div class="vital-value-wrap">
+          <span id="val-bone-mass" class="vital-value">98.2</span>
+          <span class="vital-unit">%</span>
+        </div>
+        <div class="vital-bar">
+          <div class="vital-bar-fill" style="width: 98%;"></div>
+        </div>
+      </article>
+
+      <!-- Stress & Cognitive Index Card -->
+      <article class="vital-card">
+        <div class="vital-card-top">
+          <div class="vital-label-group">
+            <span class="vital-label">STRESS / COGNITIVE</span>
+            <span class="vital-code">GALVANIC / HRV</span>
+          </div>
+          <span id="status-stress" class="vital-status-pill status-nominal">LOW</span>
+        </div>
+        <div class="vital-value-wrap">
+          <span id="val-stress" class="vital-value">24</span>
+          <span class="vital-unit">%</span>
+        </div>
+        <div class="vital-bar">
+          <div class="vital-bar-fill" style="width: 24%;"></div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ====================================================================
+         Main Mid Section: Silhouette (Left) & Real-Time Charts (Right)
+         ==================================================================== -->
+    <main class="hud-main-grid">
+      <!-- Left Panel: Interactive Human Silhouette & Thermal Scale -->
+      <section class="hud-panel">
+        <header class="hud-panel-header">
+          <div class="hud-panel-title">
+            <span class="title-icon">&#9672;</span>
+            <h2>BIOMETRIC THERMAL SCAN</h2>
+          </div>
+          <div class="gender-switcher" role="group" aria-label="Gender model selector">
+            <button class="gender-btn active" id="btn-male" data-gender="male" aria-pressed="true">MALE</button>
+            <button class="gender-btn" id="btn-female" data-gender="female" aria-pressed="false">FEMALE</button>
+          </div>
+        </header>
+
+        <div class="hud-panel-body">
+          <div class="silhouette-stage">
+            <!-- Radar Reticle Background Elements -->
+            <div class="silhouette-radar-circle circle-1"></div>
+            <div class="silhouette-radar-circle circle-2"></div>
+            <div class="scanner-laser"></div>
+
+            <!-- 3D Holographic Body Render + Zone Overlay -->
+            <div class="silhouette-svg-container">
+              <!-- body-3d-stage wraps the image + all overlay zones -->
+              <div class="body-3d-stage" id="biometric-silhouette">
+
+                <!-- 3D render: hologram appearance via CSS filter -->
+                <img
+                  id="body-3d-render"
+                  class="body-3d-render"
+                  src="assets/body-3d-male.jpg"
+                  alt="3D anatomical render"
+                  draggable="false"
+                />
+
+                <!-- HUD Corner / Frame SVG overlay (purely decorative) -->
+                <svg class="hud-frame-svg" viewBox="0 0 260 480" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M 8 22 L 8 8 L 22 8"          class="hud-svg-corner"/>
+                  <path d="M 252 22 L 252 8 L 238 8"      class="hud-svg-corner"/>
+                  <path d="M 8 458 L 8 472 L 22 472"      class="hud-svg-corner"/>
+                  <path d="M 252 458 L 252 472 L 238 472" class="hud-svg-corner"/>
+                  <line x1="8"   y1="20" x2="8"   y2="460" stroke="rgba(148,163,184,0.12)" stroke-width="0.75"/>
+                  <line x1="252" y1="20" x2="252" y2="460" stroke="rgba(148,163,184,0.12)" stroke-width="0.75"/>
+                  <line x1="130" y1="8"  x2="130" y2="472" stroke="rgba(148,163,184,0.08)" stroke-width="0.75" stroke-dasharray="4 4"/>
+                  <circle cx="130" cy="52" r="42" stroke="rgba(56,189,248,0.18)" stroke-width="0.8" stroke-dasharray="3 3" fill="none"/>
+                  <ellipse cx="130" cy="460" rx="62" ry="10" stroke="rgba(56,189,248,0.25)" stroke-width="0.8" stroke-dasharray="4 3" fill="none"/>
+                  <text x="10"  y="14" class="hud-svg-text">3D-BIO // M04</text>
+                  <text x="186" y="14" class="hud-svg-text">VOX: 0.1mm</text>
+                </svg>
+
+                <!-- ============================================================
+                     ZONE OVERLAY: 13 Anatomical Heat Zones (div-based, % coords)
+                     ============================================================ -->
+
+                <!-- Zone: HEAD (#zone-head) [Mandatory] -->
+                <div id="zone-head"
+                     class="heat-zone-div zone-blue" data-zone-name="CRANIAL / NEUROLOGICAL" data-load="18%" data-temp="36.7 &#176;C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Head thermal zone">
+                  <span class="zone-dot-marker"></span>
+                </div>
+
+                <!-- Zone: NECK (#zone-neck) [New] -->
+                <div id="zone-neck"
+                     class="heat-zone-div zone-blue" data-zone-name="CERVICAL / NECK" data-load="12%" data-temp="36.5 &#176;C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Neck thermal zone">
+                  <span class="zone-dot-marker"></span>
+                </div>
+
+                <!-- Zone: CHEST (#zone-chest) [Mandatory] -->
+                <div id="zone-chest"
+                     class="heat-zone-div zone-green" data-zone-name="THORACIC / CARDIOPULMONARY" data-load="34%" data-temp="37.1 &#176;C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Chest thermal zone">
+                  <span class="zone-dot-marker"></span>
+                </div>
+
+                <!-- Zone: LEFT ELBOW (#zone-elbows-left) [New] -->
+                <div id="zone-elbows-left"
+                     class="heat-zone-div zone-blue" data-zone-name="LEFT ELBOW / CUBITAL" data-load="19%" data-temp="36.6 &#176;C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Left elbow thermal zone">
+                  <span class="zone-dot-marker"></span>
+                </div>
+
+                <!-- Zone: RIGHT ELBOW (#zone-elbows-right) [New] -->
+                <div id="zone-elbows-right"
+                     class="heat-zone-div zone-blue" data-zone-name="RIGHT ELBOW / CUBITAL" data-load="21%" data-temp="36.7 &#176;C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Right elbow thermal zone">
+                  <span class="zone-dot-marker"></span>
+                </div>
+
+                <!-- Zone: ABDOMEN (#zone-abdomen) [Mandatory] -->
+                <div id="zone-abdomen"
+                     class="heat-zone-div zone-yellow" data-zone-name="ABDOMINAL / CORE ORGANS" data-load="58%" data-temp="37.8 &#176;C" data-status="ELEVATED" tabindex="0" role="button" aria-label="Abdomen thermal zone">
+                  <span class="zone-dot-marker"></span>
+                </div>
+
+                <!-- Zone: LEFT ARM (#zone-arms-left) -->
+                <div id="zone-arms-left"
+                     class="heat-zone-div zone-green" data-zone-name="LEFT ARM / BRACHIAL &amp; HAND" data-load="22%" data-temp="36.6 &#176;C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Left arm sensor zone">
+                  <span class="zone-dot-marker"></span>
+                </div>
+
+                <!-- Zone: RIGHT ARM (#zone-arms-right) -->
+                <div id="zone-arms-right"
+                     class="heat-zone-div zone-green" data-zone-name="RIGHT ARM / BRACHIAL &amp; HAND" data-load="41%" data-temp="36.9 &#176;C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Right arm sensor zone">
+                  <span class="zone-dot-marker"></span>
+                </div>
+
+                <!-- Zone: LEFT HIP & THIGH (#zone-hips-left) -->
+                <div id="zone-hips-left"
+                     class="heat-zone-div zone-green" data-zone-name="LEFT PELVIS &amp; FEMORAL THIGH" data-load="32%" data-temp="36.8 &#176;C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Left hip and thigh sensor zone">
+                  <span class="zone-dot-marker"></span>
+                </div>
+
+                <!-- Zone: RIGHT HIP & THIGH (#zone-hips-right) -->
+                <div id="zone-hips-right"
+                     class="heat-zone-div zone-yellow" data-zone-name="RIGHT PELVIS &amp; FEMORAL THIGH" data-load="54%" data-temp="37.5 &#176;C" data-status="ELEVATED" tabindex="0" role="button" aria-label="Right hip and thigh sensor zone">
+                  <span class="zone-dot-marker"></span>
+                </div>
+
+                <!-- Zone: KNEES (#zone-knees) [Mandatory] -->
+                <div id="zone-knees"
+                     class="heat-zone-div zone-orange" data-zone-name="MUSCULOSKELETAL / KNEES" data-load="76%" data-temp="38.4 &#176;C" data-status="WARNING" tabindex="0" role="button" aria-label="Knees thermal zone">
+                  <div class="zone-knees-wrap"><span class="zone-dot-marker"></span><span class="zone-dot-marker"></span></div>
+                </div>
+
+                <!-- Zone: LEFT LOWER LEG & FOOT (#zone-legs-left) -->
+                <div id="zone-legs-left"
+                     class="heat-zone-div zone-green" data-zone-name="LEFT SHIN, CALF &amp; FOOT" data-load="28%" data-temp="36.5 &#176;C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Left leg and foot sensor zone">
+                  <span class="zone-dot-marker"></span>
+                </div>
+
+                <!-- Zone: RIGHT LOWER LEG & FOOT (#zone-legs-right) -->
+                <div id="zone-legs-right"
+                     class="heat-zone-div zone-yellow" data-zone-name="RIGHT SHIN, CALF &amp; FOOT" data-load="62%" data-temp="37.6 &#176;C" data-status="ELEVATED" tabindex="0" role="button" aria-label="Right leg and foot sensor zone">
+                  <span class="zone-dot-marker"></span>
+                </div>
+
+              </div><!-- /.body-3d-stage -->
+            </div>
+
+            <!-- Vertical Thermal Gradient Scale with Markings (Green to Red) -->
+            <div class="thermal-scale-wrapper" aria-label="Thermal Load Scale">
+              <span class="thermal-scale-title">THERMAL LOAD</span>
+              <div class="thermal-scale-container">
+                <div class="thermal-gradient-bar"></div>
+                <div class="thermal-scale-divisions">
+                  <span class="scale-mark crit">100%</span>
+                  <span class="scale-mark warn">75%</span>
+                  <span class="scale-mark elev">50%</span>
+                  <span class="scale-mark nom">25%</span>
+                  <span class="scale-mark opt">0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Panel: Real-Time Charts (Chart.js) -->
+      <section class="charts-column">
+        <!-- Radiation Exposure Chart -->
+        <article class="hud-panel chart-card">
+          <header class="hud-panel-header">
+            <div class="hud-panel-title">
+              <span class="title-icon" style="color: var(--status-critical);">▲</span>
+              <h2>RADIATION EXPOSURE (mSv)</h2>
+            </div>
+            <div class="chart-legend-indicator">
+              <span class="chart-dot red"></span>
+              <span>ACCUMULATED SPE / GCR FLUX</span>
+            </div>
+          </header>
+          <div class="hud-panel-body">
+            <div class="chart-container-box">
+              <canvas id="chart-radiation"></canvas>
+            </div>
+          </div>
+        </article>
+
+        <!-- Hydration & Metabolism Chart -->
+        <article class="hud-panel chart-card">
+          <header class="hud-panel-header">
+            <div class="hud-panel-title">
+              <span class="title-icon" style="color: var(--neon-cyan);">◆</span>
+              <h2>HYDRATION & METABOLISM (%)</h2>
+            </div>
+            <div class="chart-legend-indicator">
+              <span class="chart-dot cyan"></span>
+              <span>ELECTROLYTE & METABOLIC FLUX</span>
+            </div>
+          </header>
+          <div class="hud-panel-body">
+            <div class="chart-container-box">
+              <canvas id="chart-hydration"></canvas>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <!-- ====================================================================
+         Bottom Section: Simulation Controls & Medical Protocols
+         ==================================================================== -->
+    <section class="hud-bottom-grid">
+      <!-- Simulation Controls Panel -->
+      <article class="hud-panel">
+        <header class="hud-panel-header">
+          <div class="hud-panel-title">
+            <span class="title-icon">⚙</span>
+            <h2>MISSION SIMULATION PARAMETERS</h2>
+          </div>
+          <span class="hud-panel-tag">SIM-CORE V2.4</span>
+        </header>
+
+        <div class="hud-panel-body">
+          <form class="sim-controls-form" onsubmit="return false;">
+            <!-- Simulation Scenario Preset Select -->
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="sim-preset-select" class="form-label">SCENARIO PRESET</label>
+                <span class="form-value-pill">ACTIVE</span>
+              </div>
+              <select id="sim-preset-select" class="sim-select">
+                <option value="nominal">Nominal Low-Earth Orbit (Baseline)</option>
+                <option value="eva-high">Lunar Surface EVA (High Physical Load)</option>
+                <option value="solar-storm">Solar Particle Event (SPE Storm Alert)</option>
+                <option value="deep-space">Deep Space Mars Transit (Extended Day 600+)</option>
+                <option value="reentry">Atmospheric Re-entry & Gravitational Strain</option>
+              </select>
+            </div>
+
+            <!-- Radiation Slider -->
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="slider-radiation" class="form-label">RADIATION RATE (mSv)</label>
+                <span id="disp-slider-radiation" class="form-value-pill">42 mSv</span>
+              </div>
+              <input type="range" id="slider-radiation" class="sim-slider" min="0" max="500" value="42" step="1">
+            </div>
+
+            <!-- Days in Orbit Slider -->
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="slider-days" class="form-label">DAYS IN ORBIT</label>
+                <span id="disp-slider-days" class="form-value-pill">120 d</span>
+              </div>
+              <input type="range" id="slider-days" class="sim-slider" min="1" max="1000" value="120" step="1">
+            </div>
+
+            <!-- Stress Level Slider -->
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="slider-stress" class="form-label">PHYSIOLOGICAL STRESS INDEX</label>
+                <span id="disp-slider-stress" class="form-value-pill">24%</span>
+              </div>
+              <input type="range" id="slider-stress" class="sim-slider" min="0" max="100" value="24" step="1">
+            </div>
+          </form>
+        </div>
+      </article>
+
+      <!-- Action Protocols Container -->
+      <article class="hud-panel">
+        <header class="hud-panel-header">
+          <div class="hud-panel-title">
+            <span class="title-icon">✚</span>
+            <h2>ACTION PROTOCOLS & COUNTERMEASURES</h2>
+          </div>
+          <span class="hud-panel-tag">DYNAMIC ENGINE</span>
+        </header>
+
+        <div class="hud-panel-body">
+          <div id="protocols-container" class="protocols-list">
+            <!-- Dynamic Protocol Card 1 -->
+            <div class="protocol-card p-crit">
+              <div class="protocol-card-head">
+                <span class="protocol-title">RADIATION STORM SHELTER PROTOCOL</span>
+                <span class="protocol-badge status-critical">PRIORITY-1</span>
+              </div>
+              <p class="protocol-desc">Direct astronaut to water-shielded habitat storm shelter. Activate active electromagnetic deflectors and administer radioprotective antioxidants (Amifostine analogue).</p>
+              <button type="button" class="protocol-action-btn">EXECUTE PROTOCOL // SEC-01</button>
+            </div>
+
+            <!-- Dynamic Protocol Card 2 -->
+            <div class="protocol-card p-warn">
+              <div class="protocol-card-head">
+                <span class="protocol-title">MUSCULOSKELETAL JOINT COMPRESSION</span>
+                <span class="protocol-badge status-warning">ELEVATED</span>
+              </div>
+              <p class="protocol-desc">Knee and lower limb joint thermal sensors indicate localized overload (76%). Schedule 45-min ARED pneumatic resistance cycle with cooling cuffs.</p>
+              <button type="button" class="protocol-action-btn">SCHEDULE ARED SESSION</button>
+            </div>
+
+            <!-- Dynamic Protocol Card 3 -->
+            <div class="protocol-card p-nom">
+              <div class="protocol-card-head">
+                <span class="protocol-title">ELECTROLYTE & FLUID REHYDRATION</span>
+                <span class="protocol-badge status-nominal">ROUTINE</span>
+              </div>
+              <p class="protocol-desc">Metabolic rate elevated after EVA. Dispense 650 ml isotonic electrolyte solution to prevent cephalad fluid redistribution dehydration.</p>
+              <button type="button" class="protocol-action-btn">DISPENSE HYDRATION PACK</button>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+  </div>
+
+  <!-- =====================================================================
+       Inline UI Script: Gender Switcher + Div-Zone Tooltip Handling
+       ===================================================================== -->
+  <script>
+  (function () {
+    'use strict';
+
+    /* -- 1. Gender Switcher & Anatomical Zone Calibrations ------------------ */
+    var renders = { male: 'assets/body-3d-male.jpg', female: 'assets/body-3d-female.jpg' };
+    var img       = document.getElementById('body-3d-render');
+    var btnMale   = document.getElementById('btn-male');
+    var btnFemale = document.getElementById('btn-female');
+
+    var coords = {
+      male: {
+        'zone-head':         { top: '13%',   left: '50%' },
+        'zone-neck':         { top: '21.5%', left: '50%' },
+        'zone-chest':        { top: '30%',   left: '50%' },
+        'zone-abdomen':      { top: '43%',   left: '50%' },
+        'zone-elbows-left':  { top: '38.5%', left: '27.5%' },
+        'zone-elbows-right': { top: '38.5%', left: '72.5%' },
+        'zone-arms-left':    { top: '47%',   left: '21.5%' },
+        'zone-arms-right':   { top: '47%',   left: '78.5%' },
+        'zone-hips-left':    { top: '57%',   left: '41.5%' },
+        'zone-hips-right':   { top: '57%',   left: '58.5%' },
+        'zone-knees':        { top: '70%',   left: '50%' },
+        'zone-legs-left':    { top: '82%',   left: '42%' },
+        'zone-legs-right':   { top: '82%',   left: '58%' }
+      },
+      female: {
+        'zone-head':         { top: '17.5%', left: '50%' },
+        'zone-neck':         { top: '24%',   left: '50%' },
+        'zone-chest':        { top: '31%',   left: '50%' },
+        'zone-abdomen':      { top: '42%',   left: '50%' },
+        'zone-elbows-left':  { top: '39%',   left: '33%' },
+        'zone-elbows-right': { top: '39%',   left: '67%' },
+        'zone-arms-left':    { top: '48%',   left: '31%' },
+        'zone-arms-right':   { top: '48%',   left: '69%' },
+        'zone-hips-left':    { top: '56%',   left: '43%' },
+        'zone-hips-right':   { top: '56%',   left: '57%' },
+        'zone-knees':        { top: '69%',   left: '50%' },
+        'zone-legs-left':    { top: '80%',   left: '43%' },
+        'zone-legs-right':   { top: '80%',   left: '57%' }
+      }
+    };
+
+    function applyZoneCoordinates(gender) {
+      var set = coords[gender];
+      if (!set) return;
+      Object.keys(set).forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) {
+          el.style.top = set[id].top;
+          el.style.left = set[id].left;
+        }
+      });
+    }
+
+    function setGender(gender) {
+      if (!img) return;
+      img.src = renders[gender];
+      applyZoneCoordinates(gender);
+      [btnMale, btnFemale].forEach(function (btn) {
+        if (!btn) return;
+        var active = btn.dataset.gender === gender;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-pressed', String(active));
+      });
+    }
+
+    if (btnMale)   btnMale.addEventListener('click',   function () { setGender('male'); });
+    if (btnFemale) btnFemale.addEventListener('click', function () { setGender('female'); });
+
+    // Set initial male coordinates
+    applyZoneCoordinates('male');
+
+    /* -- 2. HUD Tooltip for div-based heat zones --------------------------- */
+    var tooltip   = document.getElementById('silhouette-tooltip');
+    var tipTitle  = document.getElementById('tooltip-zone-title');
+    var tipStatus = document.getElementById('tooltip-zone-status');
+    var tipLoad   = document.getElementById('tooltip-zone-load');
+    var tipTemp   = document.getElementById('tooltip-zone-temp');
+
+    var statusClass = {
+      NOMINAL:  'status-nominal',
+      ELEVATED: 'status-elevated',
+      WARNING:  'status-warning',
+      CRITICAL: 'status-critical'
+    };
+
+    function showTooltip(el, x, y) {
+      if (!tooltip) return;
+      var name   = el.dataset.zoneName || 'ZONE';
+      var load   = el.dataset.load     || '--';
+      var temp   = el.dataset.temp     || '--';
+      var status = (el.dataset.status  || 'NOMINAL').toUpperCase();
+
+      if (tipTitle)  tipTitle.textContent  = name;
+      if (tipLoad)   tipLoad.textContent   = load;
+      if (tipTemp)   tipTemp.textContent   = temp;
+      if (tipStatus) {
+        tipStatus.textContent = status;
+        tipStatus.className   = 'tooltip-badge ' + (statusClass[status] || 'status-nominal');
+      }
+
+      tooltip.style.display = 'flex';
+      positionTooltip(x, y);
+    }
+
+    function positionTooltip(x, y) {
+      if (!tooltip) return;
+      var TW  = tooltip.offsetWidth  || 240;
+      var TH  = tooltip.offsetHeight || 100;
+      var GAP = 14;
+      var left = x - TW - GAP;
+      var top  = y - TH / 2;
+      if (left < 8) left = x + GAP;
+      if (top  < 8) top  = 8;
+      if (top + TH > window.innerHeight - 8) top = window.innerHeight - TH - 8;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top  = top  + 'px';
+    }
+
+    function hideTooltip() { if (tooltip) tooltip.style.display = 'none'; }
+
+    document.querySelectorAll('.heat-zone-div').forEach(function (zone) {
+      zone.addEventListener('mousemove',  function (e) { showTooltip(zone, e.clientX, e.clientY); });
+      zone.addEventListener('mouseenter', function (e) { showTooltip(zone, e.clientX, e.clientY); });
+      zone.addEventListener('mouseleave', hideTooltip);
+      zone.addEventListener('click', function (e) {
+        var r = zone.getBoundingClientRect();
+        showTooltip(zone, r.right, r.top + r.height / 2);
+        e.stopPropagation();
+      });
+      zone.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          var r = zone.getBoundingClientRect();
+          showTooltip(zone, r.right, r.top + r.height / 2);
+        }
+        if (e.key === 'Escape') hideTooltip();
+      });
+      zone.addEventListener('blur', hideTooltip);
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.heat-zone-div')) hideTooltip();
+    });
+  })();
+  </script>
+  <!-- JavaScript Scripts: UI & Logic Stubs -->
+  <script src="js/charts.js"></script>
+  <script src="js/telemetry.js"></script>
+  <script src="js/protocols.js"></script>
+</body>
+</html>
