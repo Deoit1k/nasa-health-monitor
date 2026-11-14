@@ -75,7 +75,7 @@
          ==================================================================== -->
     <section class="hud-vitals-grid" aria-label="Astronaut Vital Signs">
       <!-- Heart Rate Card -->
-      <article class="vital-card">
+      <article class="vital-card vital-card-heart">
         <div class="vital-card-top">
           <div class="vital-label-group">
             <span class="vital-label">HEART RATE</span>
@@ -87,8 +87,8 @@
           <span id="val-heart-rate" class="vital-value">72</span>
           <span class="vital-unit">BPM</span>
         </div>
-        <div class="vital-bar">
-          <div class="vital-bar-fill" style="width: 68%;"></div>
+        <div class="ecg-sparkline-wrap">
+          <canvas id="ecg-sparkline" class="ecg-sparkline-canvas" width="220" height="26"></canvas>
         </div>
       </article>
 
