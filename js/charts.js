@@ -7,7 +7,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   initCharts();
   initSilhouetteInteraction();
-  initSimulationControls();
 });
 
 let radiationChartInstance = null;
@@ -47,8 +46,8 @@ function initRadiationChart() {
   gradient.addColorStop(0.5, 'rgba(248, 113, 113, 0.08)');
   gradient.addColorStop(1, 'rgba(248, 113, 113, 0.0)');
 
-  const labels = ['T-60m', 'T-50m', 'T-40m', 'T-30m', 'T-20m', 'T-10m', 'LIVE'];
-  const data = [0.18, 0.22, 0.29, 0.35, 0.41, 0.48, 0.42];
+  const labels = [];
+  const data = [];
 
   radiationChartInstance = new Chart(ctx, {
     type: 'line',
@@ -56,7 +55,7 @@ function initRadiationChart() {
       labels: labels,
       datasets: [
         {
-          label: 'Radiation (mSv/hr)',
+          label: 'Accumulated radiation (mSv)',
           data: data,
           borderColor: '#f87171',
           borderWidth: 2,
@@ -114,14 +113,13 @@ function initRadiationChart() {
         },
         y: {
           min: 0,
-          max: 0.8,
+          suggestedMax: 1,
           grid: {
             color: 'rgba(148, 163, 184, 0.08)',
             tickColor: 'rgba(148, 163, 184, 0.16)'
           },
           ticks: {
             color: '#94a3b8',
-            stepSize: 0.2,
             font: {
               family: "'JetBrains Mono', monospace",
               size: 11,
@@ -150,9 +148,9 @@ function initHydrationChart() {
   gradientSky.addColorStop(0.5, 'rgba(56, 189, 248, 0.06)');
   gradientSky.addColorStop(1, 'rgba(56, 189, 248, 0.0)');
 
-  const labels = ['04:00', '06:00', '08:00', '10:00', '12:00', '14:00', 'NOW'];
-  const hydrationData = [94, 91, 88, 86, 92, 90, 89];
-  const metabolismData = [72, 75, 84, 88, 82, 78, 80];
+  const labels = [];
+  const hydrationData = [];
+  const metabolismData = [];
 
   hydrationChartInstance = new Chart(ctx, {
     type: 'line',
@@ -230,7 +228,7 @@ function initHydrationChart() {
           }
         },
         y: {
-          min: 60,
+          min: 0,
           max: 100,
           grid: {
             color: 'rgba(148, 163, 184, 0.08)',
@@ -265,6 +263,12 @@ function initSilhouetteInteraction() {
 
   // Select all interactive heat zones (both mandatory core zones and expanded limbs/hips/legs)
   const zones = Array.from(document.querySelectorAll('.heat-zone'));
+  let displayedZone = null;
+
+  // Keep open hover/tap/keyboard tooltips synchronized without changing interaction behavior.
+  document.addEventListener('telemetry:update', () => {
+    if (displayedZone && tooltip && tooltip.style.display === 'flex') updateTooltipContent(displayedZone);
+  });
 
   function updateTooltipContent(zone) {
     const name = zone.getAttribute('data-zone-name') || 'BIOMETRIC ZONE';
@@ -287,7 +291,9 @@ function initSilhouetteInteraction() {
   }
 
   function showAndPosition(zone, clientX, clientY) {
+    displayedZone = zone;
     updateTooltipContent(zone);
+    if (tooltip) tooltip.setAttribute('aria-hidden', 'false');
     if (tooltip) {
       tooltip.style.display = 'flex';
       positionTooltip(clientX, clientY, tooltip, zone);
@@ -309,7 +315,10 @@ function initSilhouetteInteraction() {
     zone.addEventListener('mouseleave', () => {
       // On mouse leave, hide tooltip when hover is supported
       if (window.matchMedia('(hover: hover)').matches) {
-        if (tooltip) tooltip.style.display = 'none';
+        if (tooltip) {
+          tooltip.style.display = 'none';
+          tooltip.setAttribute('aria-hidden', 'true');
+        }
         zone.classList.remove('is-active');
       }
     });
@@ -344,6 +353,7 @@ function initSilhouetteInteraction() {
     if (!e.target.closest('.heat-zone') && !e.target.closest('#silhouette-tooltip')) {
       if (tooltip) {
         tooltip.style.display = 'none';
+        tooltip.setAttribute('aria-hidden', 'true');
       }
       zones.forEach(z => z.classList.remove('is-active'));
     }
@@ -411,66 +421,24 @@ function positionTooltip(clientX, clientY, tooltip, zone) {
 const positionTooltipLeft = positionTooltip;
 
 /**
- * Simulation Controls UI Listeners & Presets
+ * Consume bounded telemetry history; keep chart styling and input handling separate.
  */
-function initSimulationControls() {
-  const presetSelect = document.getElementById('sim-preset-select');
-  const sliderRadiation = document.getElementById('slider-radiation');
-  const sliderDays = document.getElementById('slider-days');
-  const sliderStress = document.getElementById('slider-stress');
-
-  const valDispRad = document.getElementById('disp-slider-radiation');
-  const valDispDays = document.getElementById('disp-slider-days');
-  const valDispStress = document.getElementById('disp-slider-stress');
-
-  // Live value readouts
-  if (sliderRadiation && valDispRad) {
-    sliderRadiation.addEventListener('input', (e) => {
-      valDispRad.textContent = `${e.target.value} mSv`;
-    });
+document.addEventListener('telemetry:update', event => {
+  const { history } = event.detail;
+  const labels = history.map(sample => `D${sample.missionDays.toFixed(5)}`);
+  if (radiationChartInstance) {
+    const chart = radiationChartInstance;
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = history.map(sample => sample.radiation);
+    // Never clip a high-dose preset against the mockup's original 0.8 mSv ceiling.
+    chart.options.scales.y.max = Math.max(1, ...chart.data.datasets[0].data) * 1.1;
+    chart.update('none');
   }
-
-  if (sliderDays && valDispDays) {
-    sliderDays.addEventListener('input', (e) => {
-      valDispDays.textContent = `${e.target.value} d`;
-    });
+  if (hydrationChartInstance) {
+    const chart = hydrationChartInstance;
+    chart.data.labels = labels.slice();
+    chart.data.datasets[0].data = history.map(sample => sample.hydration);
+    chart.data.datasets[1].data = history.map(sample => sample.metabolism);
+    chart.update('none');
   }
-
-  if (sliderStress && valDispStress) {
-    sliderStress.addEventListener('input', (e) => {
-      valDispStress.textContent = `${e.target.value}%`;
-    });
-  }
-
-  // Preset selector quick adjustments
-  if (presetSelect) {
-    const presets = {
-      'nominal': { rad: 42, days: 120, stress: 24 },
-      'eva-high': { rad: 165, days: 180, stress: 58 },
-      'solar-storm': { rad: 420, days: 240, stress: 82 },
-      'deep-space': { rad: 310, days: 680, stress: 72 },
-      'reentry': { rad: 85, days: 420, stress: 65 }
-    };
-
-    presetSelect.addEventListener('change', (e) => {
-      const p = presets[e.target.value];
-      if (!p) return;
-
-      if (sliderRadiation) {
-        sliderRadiation.value = p.rad;
-        if (valDispRad) valDispRad.textContent = `${p.rad} mSv`;
-        sliderRadiation.dispatchEvent(new Event('input'));
-      }
-      if (sliderDays) {
-        sliderDays.value = p.days;
-        if (valDispDays) valDispDays.textContent = `${p.days} d`;
-        sliderDays.dispatchEvent(new Event('input'));
-      }
-      if (sliderStress) {
-        sliderStress.value = p.stress;
-        if (valDispStress) valDispStress.textContent = `${p.stress}%`;
-        sliderStress.dispatchEvent(new Event('input'));
-      }
-    });
-  }
-}
+});
