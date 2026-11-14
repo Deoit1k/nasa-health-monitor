@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" translate="no">
 <head>
   <meta charset="UTF-8">
@@ -75,7 +75,7 @@
          ==================================================================== -->
     <section class="hud-vitals-grid" aria-label="Astronaut Vital Signs">
       <!-- Heart Rate Card -->
-      <article class="vital-card">
+      <article class="vital-card vital-card-heart">
         <div class="vital-card-top">
           <div class="vital-label-group">
             <span class="vital-label">HEART RATE</span>
@@ -87,8 +87,8 @@
           <span id="val-heart-rate" class="vital-value">72</span>
           <span class="vital-unit">BPM</span>
         </div>
-        <div class="vital-bar">
-          <div class="vital-bar-fill" style="width: 68%;"></div>
+        <div class="ecg-sparkline-wrap">
+          <canvas id="ecg-sparkline" class="ecg-sparkline-canvas" width="220" height="26"></canvas>
         </div>
       </article>
 
@@ -483,19 +483,19 @@
         'zone-legs-right':   { top: '82%',   left: '58%' }
       },
       female: {
-        'zone-head':         { top: '17.5%', left: '50%' },
-        'zone-neck':         { top: '24%',   left: '50%' },
+        'zone-head':         { top: '14.5%', left: '50%' },
+        'zone-neck':         { top: '22.5%', left: '50%' },
         'zone-chest':        { top: '31%',   left: '50%' },
-        'zone-abdomen':      { top: '42%',   left: '50%' },
-        'zone-elbows-left':  { top: '39%',   left: '33%' },
-        'zone-elbows-right': { top: '39%',   left: '67%' },
-        'zone-arms-left':    { top: '48%',   left: '31%' },
-        'zone-arms-right':   { top: '48%',   left: '69%' },
-        'zone-hips-left':    { top: '56%',   left: '43%' },
-        'zone-hips-right':   { top: '56%',   left: '57%' },
-        'zone-knees':        { top: '69%',   left: '50%' },
-        'zone-legs-left':    { top: '80%',   left: '43%' },
-        'zone-legs-right':   { top: '80%',   left: '57%' }
+        'zone-abdomen':      { top: '42.5%', left: '50%' },
+        'zone-elbows-left':  { top: '39.5%', left: '39%' },
+        'zone-elbows-right': { top: '39.5%', left: '61%' },
+        'zone-arms-left':    { top: '49.5%', left: '36%' },
+        'zone-arms-right':   { top: '49.5%', left: '64%' },
+        'zone-hips-left':    { top: '56%',   left: '43.5%' },
+        'zone-hips-right':   { top: '56%',   left: '56.5%' },
+        'zone-knees':        { top: '70%',   left: '50%' },
+        'zone-legs-left':    { top: '81%',   left: '45%' },
+        'zone-legs-right':   { top: '81%',   left: '55%' }
       }
     };
 
@@ -509,6 +509,15 @@
           el.style.left = set[id].left;
         }
       });
+      // Adjust knees spacing for female vs male if needed
+      var kneesEl = document.getElementById('zone-knees');
+      if (kneesEl) {
+        if (gender === 'female') {
+          kneesEl.style.width = '36px';
+        } else {
+          kneesEl.style.width = '62px';
+        }
+      }
     }
 
     function setGender(gender) {
@@ -600,6 +609,38 @@
 
     document.addEventListener('click', function (e) {
       if (!e.target.closest('.heat-zone-div')) hideTooltip();
+    });
+      window.updateZoneStatus = function (zoneId, status, load, temp) {
+      var el = document.getElementById(zoneId);
+      if (!el) return;
+      var upper = (status || 'NOMINAL').toUpperCase();
+      el.setAttribute('data-status', upper);
+      if (load) el.setAttribute('data-load', load);
+      if (temp) el.setAttribute('data-temp', temp);
+
+      el.classList.remove('optimal', 'normal', 'status-nominal', 'zone-blue', 'zone-green',
+                          'elevated', 'strain', 'warning', 'status-elevated', 'status-warning', 'zone-yellow', 'zone-orange',
+                          'critical', 'alert', 'status-critical', 'zone-red');
+
+      if (upper === 'NOMINAL' || upper === 'OPTIMAL' || upper === 'NORMAL') {
+        el.classList.add('status-nominal', 'optimal');
+      } else if (upper === 'ELEVATED' || upper === 'STRAIN' || upper === 'WARNING') {
+        el.classList.add('status-warning', 'warning');
+      } else if (upper === 'CRITICAL' || upper === 'ALERT') {
+        el.classList.add('status-critical', 'critical');
+      }
+    };
+
+    // Initialize all zones with their starting state classes based on data-status
+    document.querySelectorAll('.heat-zone-div').forEach(function (zone) {
+      var st = (zone.getAttribute('data-status') || 'NOMINAL').toUpperCase();
+      if (st === 'NOMINAL' || st === 'OPTIMAL') {
+        zone.classList.add('status-nominal', 'optimal');
+      } else if (st === 'ELEVATED' || st === 'STRAIN' || st === 'WARNING') {
+        zone.classList.add('status-warning', 'warning');
+      } else if (st === 'CRITICAL' || st === 'ALERT') {
+        zone.classList.add('status-critical', 'critical');
+      }
     });
   })();
   </script>
