@@ -1,6 +1,6 @@
 /**
  * NASA BIOMEDICAL TELEMETRY CORE
- * Layout & Grid Architecture
+ * Layout & Grid Architecture — Clean Deep Dark Theme
  */
 
 * {
@@ -11,29 +11,32 @@
 
 html, body {
   width: 100%;
+  max-width: 100%;
   min-height: 100vh;
   background-color: var(--bg-space);
   color: var(--text-primary);
   font-family: var(--font-body);
   font-size: 15px;
-  line-height: 1.45;
+  line-height: 1.5;
   overflow-x: hidden;
   position: relative;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Space Background & Grid Pattern */
+/* Page Background: Noble Deep Graphite (#080c14) with Gentle Cosmic Tint */
 body {
   background-color: var(--bg-space);
   background-image: 
-    radial-gradient(circle at 50% 15%, rgba(0, 229, 255, 0.06) 0%, transparent 60%),
-    radial-gradient(circle at 85% 80%, rgba(255, 42, 85, 0.04) 0%, transparent 45%),
-    linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    radial-gradient(circle at 50% 12%, rgba(56, 189, 248, 0.03) 0%, transparent 55%),
+    radial-gradient(circle at 85% 85%, rgba(248, 113, 113, 0.02) 0%, transparent 45%),
+    linear-gradient(rgba(148, 163, 184, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
   background-attachment: fixed;
 }
 
-/* Subtle HUD Scanline Overlay */
+/* Attenuated Scanline Layer (Maximum 0.02 Opacity — No Ripple/Flicker) */
 body::before {
   content: "";
   position: fixed;
@@ -44,16 +47,16 @@ body::before {
   pointer-events: none;
   background: repeating-linear-gradient(
     0deg,
-    rgba(0, 0, 0, 0.12) 0px,
-    rgba(0, 0, 0, 0.12) 1px,
+    rgba(0, 0, 0, 0.15) 0px,
+    rgba(0, 0, 0, 0.15) 1px,
     transparent 1px,
-    transparent 2px
+    transparent 3px
   );
   z-index: 999;
-  opacity: 0.7;
+  opacity: 0.02;
 }
 
-/* Custom Scrollbar */
+/* Clean Minimal Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -62,18 +65,18 @@ body::before {
   background: var(--bg-space);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-active);
+  background: rgba(148, 163, 184, 0.25);
   border-radius: var(--radius-sm);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--neon-cyan);
+  background: var(--accent-blue);
 }
 
 /* Master Dashboard Container */
 .hud-wrapper {
   max-width: 1680px;
   margin: 0 auto;
-  padding: 18px 24px 32px 24px;
+  padding: 20px 24px 36px 24px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -83,18 +86,19 @@ body::before {
   overflow-x: hidden;
 }
 
-/* HUD Top Header */
+/* ==========================================================================
+   Header Architecture
+   ========================================================================== */
 .hud-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 22px;
-  background: var(--bg-surface-translucent);
-  backdrop-filter: blur(12px);
+  padding: 16px 22px;
+  background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-left: 4px solid var(--neon-cyan);
+  border-left: 3px solid var(--accent-blue);
   border-radius: var(--radius-md);
-  box-shadow: var(--glow-subtle);
+  box-shadow: var(--shadow-sm);
 }
 
 .hud-header-brand {
@@ -108,35 +112,36 @@ body::before {
   align-items: center;
   justify-content: center;
   padding: 4px 10px;
-  border: 1px solid var(--neon-cyan);
-  background: rgba(0, 229, 255, 0.12);
-  color: var(--neon-cyan);
-  font-family: var(--font-display);
-  font-size: 0.85rem;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: var(--accent-blue-dim);
+  color: var(--accent-blue);
+  font-family: var(--font-brand);
+  font-size: 0.8125rem;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   border-radius: var(--radius-sm);
-  box-shadow: var(--glow-subtle);
 }
 
 .hud-header-title {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 .hud-header-title h1 {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: 3px;
-  color: var(--text-highlight);
-  text-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+  font-weight: 600;
+  letter-spacing: 0.75px;
+  color: var(--text-primary);
+  line-height: 1.25;
 }
 
 .hud-header-subtitle {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 1.5px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
   color: var(--text-secondary);
 }
 
@@ -150,22 +155,24 @@ body::before {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  gap: 3px;
 }
 
 .meta-label {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  letter-spacing: 1px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
 .meta-value {
   font-family: var(--font-mono);
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   color: var(--text-primary);
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
 .status-pill-nominal {
@@ -174,13 +181,13 @@ body::before {
   gap: 6px;
   padding: 3px 10px;
   background: var(--status-nominal-dim);
-  border: 1px solid var(--status-nominal);
+  border: 1px solid rgba(52, 211, 153, 0.35);
   color: var(--status-nominal);
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
   border-radius: 20px;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
 .status-pill-nominal::before {
@@ -189,15 +196,18 @@ body::before {
   height: 6px;
   background-color: var(--status-nominal);
   border-radius: 50%;
-  box-shadow: 0 0 8px var(--status-nominal);
-  animation: pulse-dot 2s infinite ease-in-out;
+  box-shadow: 0 0 6px var(--status-nominal);
+  animation: pulse-dot 2.5s infinite ease-in-out;
 }
 
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.35; transform: scale(0.8); }
+  50% { opacity: 0.4; transform: scale(0.85); }
 }
 
+/* ==========================================================================
+   Grid Layouts
+   ========================================================================== */
 /* Top Vitals Bar (4 Metric Cards) */
 .hud-vitals-grid {
   display: grid;
@@ -224,42 +234,23 @@ main.hud-main-grid,
   gap: 20px;
 }
 
-/* Standard HUD Panel Frame */
+/* ==========================================================================
+   HUD Panel Framing (Calm, Non-Aggressive Surfaces)
+   ========================================================================== */
 .hud-panel {
-  background: var(--bg-surface-translucent);
-  backdrop-filter: blur(14px);
+  background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-normal);
 }
 
-/* Futuristic HUD Corner Cut / Accent Brackets */
-.hud-panel::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 14px;
-  height: 14px;
-  border-top: 2px solid var(--neon-cyan);
-  border-left: 2px solid var(--neon-cyan);
-  pointer-events: none;
-}
-
-.hud-panel::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 14px;
-  height: 14px;
-  border-bottom: 2px solid var(--neon-cyan);
-  border-right: 2px solid var(--neon-cyan);
-  pointer-events: none;
+.hud-panel:hover {
+  border-color: rgba(148, 163, 184, 0.28);
 }
 
 .hud-panel-header {
@@ -268,31 +259,39 @@ main.hud-main-grid,
   align-items: center;
   padding: 12px 18px;
   border-bottom: 1px solid var(--border-subtle);
-  background: rgba(0, 229, 255, 0.03);
+  background: var(--bg-surface-elevated);
 }
 
 .hud-panel-title {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  color: var(--text-highlight);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.75px;
+  color: var(--text-primary);
   text-transform: uppercase;
 }
 
+.hud-panel-title h2 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.75px;
+}
+
 .hud-panel-title .title-icon {
-  color: var(--neon-cyan);
-  font-size: 1rem;
+  color: var(--accent-blue);
+  font-size: 0.95rem;
 }
 
 .hud-panel-tag {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  letter-spacing: 1px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
 }
 
 .hud-panel-body {
@@ -301,6 +300,7 @@ main.hud-main-grid,
   display: flex;
   flex-direction: column;
   position: relative;
+  background: var(--bg-surface);
 }
 
 /* Charts Column Layout */
@@ -314,7 +314,9 @@ main.hud-main-grid,
   min-height: 250px;
 }
 
-/* Responsive Media Queries */
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
 @media (max-width: 1280px) {
   .hud-main-grid {
     grid-template-columns: 400px 1fr;
@@ -384,8 +386,8 @@ main.hud-main-grid,
   }
 
   .hud-header-title h1 {
-    font-size: clamp(1.1rem, 5vw, 1.5rem);
-    letter-spacing: 1.5px;
+    font-size: clamp(1.1rem, 5vw, 1.35rem);
+    letter-spacing: 0.5px;
     word-break: break-word;
     overflow-wrap: break-word;
     white-space: normal;
@@ -393,13 +395,13 @@ main.hud-main-grid,
   }
 
   .hud-header-subtitle {
-    font-size: 0.68rem;
-    letter-spacing: 1px;
+    font-size: 12px;
+    letter-spacing: 0.3px;
     word-break: break-word;
     overflow-wrap: break-word;
     white-space: normal;
-    line-height: 1.35;
-    margin-top: 4px;
+    line-height: 1.4;
+    margin-top: 2px;
   }
 
   /* Metadata in 1 column or flex-wrap stack */
@@ -423,12 +425,14 @@ main.hud-main-grid,
   }
 
   .meta-label {
-    font-size: 0.68rem;
-    letter-spacing: 0.8px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.4px;
   }
 
   .meta-value {
-    font-size: 0.85rem;
+    font-size: 13px;
+    font-weight: 700;
   }
 }
 

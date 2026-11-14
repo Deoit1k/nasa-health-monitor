@@ -22,17 +22,18 @@ function initCharts() {
     return;
   }
 
-  // Global Chart.js defaults for NASA Space HUD
-  Chart.defaults.color = '#88a7c4';
-  Chart.defaults.font.family = "'Share Tech Mono', 'Rajdhani', monospace";
+  // Global Chart.js defaults for Refined Dark Space HUD
+  Chart.defaults.color = '#94a3b8';
+  Chart.defaults.font.family = "'JetBrains Mono', 'Inter', monospace";
   Chart.defaults.font.size = 11;
+  Chart.defaults.font.weight = 500;
 
   initRadiationChart();
   initHydrationChart();
 }
 
 /**
- * Chart 1: Radiation Exposure (mSv) - Red Neon Gradient
+ * Chart 1: Radiation Exposure (mSv) - Refined Red Gradient
  */
 function initRadiationChart() {
   const canvas = document.getElementById('chart-radiation');
@@ -40,11 +41,11 @@ function initRadiationChart() {
 
   const ctx = canvas.getContext('2d');
 
-  // Vertical Red Gradient Fill
+  // Vertical Soft Red Gradient Fill
   const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-  gradient.addColorStop(0, 'rgba(255, 42, 85, 0.45)');
-  gradient.addColorStop(0.5, 'rgba(255, 42, 85, 0.15)');
-  gradient.addColorStop(1, 'rgba(255, 42, 85, 0.0)');
+  gradient.addColorStop(0, 'rgba(248, 113, 113, 0.22)');
+  gradient.addColorStop(0.5, 'rgba(248, 113, 113, 0.08)');
+  gradient.addColorStop(1, 'rgba(248, 113, 113, 0.0)');
 
   const labels = ['T-60m', 'T-50m', 'T-40m', 'T-30m', 'T-20m', 'T-10m', 'LIVE'];
   const data = [0.18, 0.22, 0.29, 0.35, 0.41, 0.48, 0.42];
@@ -57,18 +58,18 @@ function initRadiationChart() {
         {
           label: 'Radiation (mSv/hr)',
           data: data,
-          borderColor: '#ff2a55',
+          borderColor: '#f87171',
           borderWidth: 2,
           backgroundColor: gradient,
           fill: true,
           tension: 0.35,
-          pointBackgroundColor: '#ff2a55',
+          pointBackgroundColor: '#f87171',
           pointBorderColor: '#ffffff',
           pointBorderWidth: 1.5,
           pointRadius: 4,
-          pointHoverRadius: 7,
+          pointHoverRadius: 6,
           pointHoverBackgroundColor: '#ffffff',
-          pointHoverBorderColor: '#ff2a55',
+          pointHoverBorderColor: '#f87171',
         }
       ]
     },
@@ -76,7 +77,7 @@ function initRadiationChart() {
       responsive: true,
       maintainAspectRatio: false,
       animation: {
-        duration: 1200,
+        duration: 1000,
         easing: 'easeOutQuart'
       },
       plugins: {
@@ -84,10 +85,10 @@ function initRadiationChart() {
           display: false
         },
         tooltip: {
-          backgroundColor: 'rgba(5, 11, 20, 0.95)',
-          titleColor: '#00e5ff',
-          bodyColor: '#ffffff',
-          borderColor: '#ff2a55',
+          backgroundColor: '#0f1623',
+          titleColor: '#f87171',
+          bodyColor: '#f1f5f9',
+          borderColor: 'rgba(248, 113, 113, 0.4)',
           borderWidth: 1,
           padding: 10,
           displayColors: false,
@@ -99,23 +100,33 @@ function initRadiationChart() {
       scales: {
         x: {
           grid: {
-            color: 'rgba(0, 229, 255, 0.06)',
-            tickColor: 'rgba(0, 229, 255, 0.2)'
+            color: 'rgba(148, 163, 184, 0.08)',
+            tickColor: 'rgba(148, 163, 184, 0.16)'
           },
           ticks: {
-            color: '#88a7c4'
+            color: '#94a3b8',
+            font: {
+              family: "'JetBrains Mono', monospace",
+              size: 11,
+              weight: 500
+            }
           }
         },
         y: {
           min: 0,
           max: 0.8,
           grid: {
-            color: 'rgba(0, 229, 255, 0.08)',
-            tickColor: 'rgba(0, 229, 255, 0.2)'
+            color: 'rgba(148, 163, 184, 0.08)',
+            tickColor: 'rgba(148, 163, 184, 0.16)'
           },
           ticks: {
-            color: '#88a7c4',
+            color: '#94a3b8',
             stepSize: 0.2,
+            font: {
+              family: "'JetBrains Mono', monospace",
+              size: 11,
+              weight: 500
+            },
             callback: (val) => val.toFixed(2)
           }
         }
@@ -125,7 +136,7 @@ function initRadiationChart() {
 }
 
 /**
- * Chart 2: Hydration & Metabolism (%) - Neon Cyan/Blue Gradient
+ * Chart 2: Hydration & Metabolism (%) - Calm Cosmic Sky Blue & Indigo
  */
 function initHydrationChart() {
   const canvas = document.getElementById('chart-hydration');
@@ -133,11 +144,11 @@ function initHydrationChart() {
 
   const ctx = canvas.getContext('2d');
 
-  // Vertical Neon Cyan Gradient Fill
-  const gradientCyan = ctx.createLinearGradient(0, 0, 0, 200);
-  gradientCyan.addColorStop(0, 'rgba(0, 229, 255, 0.40)');
-  gradientCyan.addColorStop(0.5, 'rgba(0, 229, 255, 0.12)');
-  gradientCyan.addColorStop(1, 'rgba(0, 229, 255, 0.0)');
+  // Vertical Calm Sky Blue Gradient Fill
+  const gradientSky = ctx.createLinearGradient(0, 0, 0, 200);
+  gradientSky.addColorStop(0, 'rgba(56, 189, 248, 0.20)');
+  gradientSky.addColorStop(0.5, 'rgba(56, 189, 248, 0.06)');
+  gradientSky.addColorStop(1, 'rgba(56, 189, 248, 0.0)');
 
   const labels = ['04:00', '06:00', '08:00', '10:00', '12:00', '14:00', 'NOW'];
   const hydrationData = [94, 91, 88, 86, 92, 90, 89];
@@ -151,32 +162,32 @@ function initHydrationChart() {
         {
           label: 'Hydration Level (%)',
           data: hydrationData,
-          borderColor: '#00e5ff',
-          borderWidth: 2.2,
-          backgroundColor: gradientCyan,
+          borderColor: '#38bdf8',
+          borderWidth: 2,
+          backgroundColor: gradientSky,
           fill: true,
           tension: 0.35,
-          pointBackgroundColor: '#00e5ff',
+          pointBackgroundColor: '#38bdf8',
           pointBorderColor: '#ffffff',
           pointBorderWidth: 1.5,
           pointRadius: 4,
-          pointHoverRadius: 7,
+          pointHoverRadius: 6,
           pointHoverBackgroundColor: '#ffffff',
-          pointHoverBorderColor: '#00e5ff',
+          pointHoverBorderColor: '#38bdf8',
         },
         {
           label: 'Metabolic Rate (%)',
           data: metabolismData,
-          borderColor: '#0088ff',
+          borderColor: '#818cf8',
           borderWidth: 1.8,
           borderDash: [4, 4],
           fill: false,
           tension: 0.3,
-          pointBackgroundColor: '#0088ff',
+          pointBackgroundColor: '#818cf8',
           pointBorderColor: '#ffffff',
           pointBorderWidth: 1,
           pointRadius: 3,
-          pointHoverRadius: 6
+          pointHoverRadius: 5
         }
       ]
     },
@@ -184,7 +195,7 @@ function initHydrationChart() {
       responsive: true,
       maintainAspectRatio: false,
       animation: {
-        duration: 1200,
+        duration: 1000,
         easing: 'easeOutQuart'
       },
       plugins: {
@@ -192,10 +203,10 @@ function initHydrationChart() {
           display: false
         },
         tooltip: {
-          backgroundColor: 'rgba(5, 11, 20, 0.95)',
-          titleColor: '#00e5ff',
-          bodyColor: '#ffffff',
-          borderColor: '#00e5ff',
+          backgroundColor: '#0f1623',
+          titleColor: '#38bdf8',
+          bodyColor: '#f1f5f9',
+          borderColor: 'rgba(56, 189, 248, 0.4)',
           borderWidth: 1,
           padding: 10,
           callbacks: {
@@ -206,23 +217,33 @@ function initHydrationChart() {
       scales: {
         x: {
           grid: {
-            color: 'rgba(0, 229, 255, 0.06)',
-            tickColor: 'rgba(0, 229, 255, 0.2)'
+            color: 'rgba(148, 163, 184, 0.08)',
+            tickColor: 'rgba(148, 163, 184, 0.16)'
           },
           ticks: {
-            color: '#88a7c4'
+            color: '#94a3b8',
+            font: {
+              family: "'JetBrains Mono', monospace",
+              size: 11,
+              weight: 500
+            }
           }
         },
         y: {
           min: 60,
           max: 100,
           grid: {
-            color: 'rgba(0, 229, 255, 0.08)',
-            tickColor: 'rgba(0, 229, 255, 0.2)'
+            color: 'rgba(148, 163, 184, 0.08)',
+            tickColor: 'rgba(148, 163, 184, 0.16)'
           },
           ticks: {
-            color: '#88a7c4',
+            color: '#94a3b8',
             stepSize: 10,
+            font: {
+              family: "'JetBrains Mono', monospace",
+              size: 11,
+              weight: 500
+            },
             callback: (val) => `${val}%`
           }
         }
