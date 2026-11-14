@@ -51,3 +51,7 @@ test('simulation is deterministic, separate provenance, cumulative dose and mode
  const a=D.simulate({radiation:420,days:240,stress:82}); assert.deepEqual(a,D.simulate({radiation:420,days:240,stress:82}));
  assert.equal(a.radiation,420); assert.equal(a.source,'simulated'); assert.ok(a.zones.head.load>0);
 });
+test('backup accepts equivalent units regardless of JSON property ordering',()=>{
+ const s=D.upsert(D.empty(),record());s.records[0].units=Object.fromEntries(Object.entries(s.records[0].units).reverse());
+ assert.equal(D.validateState(s,now).records.length,1);
+});

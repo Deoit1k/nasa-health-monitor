@@ -1,380 +1,51 @@
-/**
- * NASA BIOMEDICAL TELEMETRY CORE
- * UI Charts & Interactive Body Silhouette Tooltip
- * Uses Chart.js (CDN)
- */
-
-document.addEventListener('DOMContentLoaded', () => {
-  initCharts();
-  initSilhouetteInteraction();
-  initSimulationControls();
-});
-
-let radiationChartInstance = null;
-let hydrationChartInstance = null;
-
-/**
- * Initialize NASA HUD Chart.js instances
- */
-function initCharts() {
-  if (typeof Chart === 'undefined') {
-    console.warn('[HUD Charts] Chart.js CDN not loaded yet.');
-    return;
+/* Chart rendering and body interaction only; state belongs to the controllers. */
+(function () {
+  'use strict';
+  let radiationChartInstance=null, hydrationChartInstance=null;
+  const colors=['#ff2a55','#00e5ff','#6ca8fc'];
+  function chart(canvas, datasets, axes) {
+    const ctx=canvas.getContext('2d');
+    return new Chart(ctx,{type:'line',data:{labels:[],datasets:datasets.map((name,i)=>{
+      const gradient=ctx.createLinearGradient(0,0,0,190);
+      gradient.addColorStop(0,i===0&&axes==='radiation'?'rgba(255,42,85,.25)':'rgba(0,229,255,.18)');gradient.addColorStop(1,'rgba(0,0,0,0)');
+      return {label:name,data:[],borderColor:axes==='radiation'?colors[0]:colors[i+1],backgroundColor:gradient,fill:i===0,borderWidth:2,pointRadius:3,tension:0,spanGaps:false,yAxisID:axes==='recovery'&&i===1?'stress':'y'};
+    })},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:axes!=='radiation',labels:{color:'#afc2d3',font:{size:11}}}},scales:{x:{grid:{color:'#172d3e'},ticks:{color:'#91a7bb',maxTicksLimit:4,maxRotation:0}},y:{beginAtZero:true,grid:{color:'#172d3e'},ticks:{color:'#91a7bb'},...(axes==='recovery'?{title:{display:true,text:'Sleep (h)',color:'#afc2d3'},suggestedMax:10}:{title:{display:true,text:'mSv',color:'#afc2d3'}})},...(axes==='recovery'?{stress:{position:'right',min:0,max:100,grid:{drawOnChartArea:false},ticks:{color:'#91a7bb'},title:{display:true,text:'Stress (%)',color:'#afc2d3'}}}:{})}}});
   }
-
-  // Global Chart.js defaults for NASA Space HUD
-  Chart.defaults.color = '#88a7c4';
-  Chart.defaults.font.family = "'Share Tech Mono', 'Rajdhani', monospace";
-  Chart.defaults.font.size = 11;
-
-  initRadiationChart();
-  initHydrationChart();
-}
-
-/**
- * Chart 1: Radiation Exposure (mSv) - Red Neon Gradient
- */
-function initRadiationChart() {
-  const canvas = document.getElementById('chart-radiation');
-  if (!canvas) return;
-
-  const ctx = canvas.getContext('2d');
-
-  // Vertical Red Gradient Fill
-  const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-  gradient.addColorStop(0, 'rgba(255, 42, 85, 0.45)');
-  gradient.addColorStop(0.5, 'rgba(255, 42, 85, 0.15)');
-  gradient.addColorStop(1, 'rgba(255, 42, 85, 0.0)');
-
-  const labels = ['T-60m', 'T-50m', 'T-40m', 'T-30m', 'T-20m', 'T-10m', 'LIVE'];
-  const data = [0.18, 0.22, 0.29, 0.35, 0.41, 0.48, 0.42];
-
-  radiationChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Radiation (mSv/hr)',
-          data: data,
-          borderColor: '#ff2a55',
-          borderWidth: 2,
-          backgroundColor: gradient,
-          fill: true,
-          tension: 0.35,
-          pointBackgroundColor: '#ff2a55',
-          pointBorderColor: '#ffffff',
-          pointBorderWidth: 1.5,
-          pointRadius: 4,
-          pointHoverRadius: 7,
-          pointHoverBackgroundColor: '#ffffff',
-          pointHoverBorderColor: '#ff2a55',
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: {
-        duration: 1200,
-        easing: 'easeOutQuart'
-      },
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          backgroundColor: 'rgba(5, 11, 20, 0.95)',
-          titleColor: '#00e5ff',
-          bodyColor: '#ffffff',
-          borderColor: '#ff2a55',
-          borderWidth: 1,
-          padding: 10,
-          displayColors: false,
-          callbacks: {
-            label: (context) => `RAD DOSE: ${context.parsed.y.toFixed(2)} mSv`
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: {
-            color: 'rgba(0, 229, 255, 0.06)',
-            tickColor: 'rgba(0, 229, 255, 0.2)'
-          },
-          ticks: {
-            color: '#88a7c4'
-          }
-        },
-        y: {
-          min: 0,
-          max: 0.8,
-          grid: {
-            color: 'rgba(0, 229, 255, 0.08)',
-            tickColor: 'rgba(0, 229, 255, 0.2)'
-          },
-          ticks: {
-            color: '#88a7c4',
-            stepSize: 0.2,
-            callback: (val) => val.toFixed(2)
-          }
-        }
+  function render(records,mode) {
+    const demo=mode==='simulation';
+    const radiation=document.getElementById('chart-radiation'),recovery=document.getElementById('chart-hydration');
+    if(typeof Chart==='undefined') { document.getElementById('chart-fallback').hidden=false; radiation.parentElement.hidden=true; recovery.parentElement.hidden=true; return; }
+    if(!radiationChartInstance)radiationChartInstance=chart(radiation,['Cumulative dose (mSv)'],'radiation');
+    // Recreate for axes/units when changing between actual recovery and modeled percentages.
+    if(hydrationChartInstance && hydrationChartInstance.demo!==demo) {hydrationChartInstance.destroy();hydrationChartInstance=null;}
+    if(!hydrationChartInstance){hydrationChartInstance=chart(recovery,demo?['Modeled hydration (%)','Modeled metabolism (%)']:['Sleep (h)','Stress (%)'],demo?'percent':'recovery');hydrationChartInstance.demo=demo;if(demo){hydrationChartInstance.options.scales.y.max=100;hydrationChartInstance.options.scales.y.title.text='%';}}
+    const labels=records.map(r=>demo?`Day ${r.days}`:new Date(r.observedAt).toISOString().slice(5,16).replace('T',' ')+'Z');
+    radiationChartInstance.data.labels=labels;radiationChartInstance.data.datasets[0].data=records.map(r=>r.radiation);radiationChartInstance.update('none');
+    hydrationChartInstance.data.labels=labels;
+    hydrationChartInstance.data.datasets[0].data=records.map(r=>demo?r.hydration:r.sleep);
+    hydrationChartInstance.data.datasets[1].data=records.map(r=>demo?r.metabolism:r.stress);hydrationChartInstance.update('none');
+  }
+  function initBody() {
+    const tooltip=document.getElementById('silhouette-tooltip');
+    const targets={head:'sleep',chest:'heartRate',abdomen:'temperature',knees:'exercise'};
+    const descriptions={head:'Sleep and well-being: track sleep hours, mood and perceived stress.',chest:'Cardiovascular observations: record resting heart rate and paired blood pressure.',abdomen:'Core observations: record body temperature and daily fluid intake.',knees:'Activity: record exercise minutes; bone density cannot be inferred from activity or time in space.'};
+    for(const [name,target] of Object.entries(targets)) {
+      const zone=document.getElementById('zone-'+name);zone.setAttribute('aria-label',descriptions[name]);
+      function show(event) {
+        const demo=document.body.dataset.mode==='simulation';
+        document.getElementById('tooltip-zone-title').textContent=name.toUpperCase();
+        document.getElementById('tooltip-zone-status').textContent=demo?zone.dataset.status:'Observation navigation';
+        document.getElementById('tooltip-zone-load').textContent=demo?`Modeled load: ${zone.dataset.load}`:'Load: not measured';
+        document.getElementById('tooltip-zone-temp').textContent=demo?`Modeled temperature: ${zone.dataset.temp}`:'Local temperature: not measured';
+        tooltip.style.display='flex';tooltip.setAttribute('aria-hidden','false');zone.setAttribute('aria-describedby','silhouette-tooltip');
+        const bounds=zone.getBoundingClientRect();const x=event.clientX||bounds.left, y=event.clientY||bounds.top;
+        tooltip.style.left=Math.max(8,x-tooltip.offsetWidth-18)+'px';tooltip.style.top=Math.max(80,Math.min(innerHeight-80,y))+'px';
       }
+      function hide(){tooltip.style.display='none';tooltip.setAttribute('aria-hidden','true');zone.removeAttribute('aria-describedby');}
+      function activate(){document.getElementById('body-detail').textContent=descriptions[name];if(document.body.dataset.mode==='journal'){const input=document.getElementById(target);input.focus();input.scrollIntoView({block:'center'});}}
+      zone.addEventListener('mouseenter',show);zone.addEventListener('mousemove',show);zone.addEventListener('mouseleave',hide);zone.addEventListener('focus',show);zone.addEventListener('blur',hide);zone.addEventListener('click',activate);
+      zone.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();activate();}if(event.key==='Escape')hide();});
     }
-  });
-}
-
-/**
- * Chart 2: Hydration & Metabolism (%) - Neon Cyan/Blue Gradient
- */
-function initHydrationChart() {
-  const canvas = document.getElementById('chart-hydration');
-  if (!canvas) return;
-
-  const ctx = canvas.getContext('2d');
-
-  // Vertical Neon Cyan Gradient Fill
-  const gradientCyan = ctx.createLinearGradient(0, 0, 0, 200);
-  gradientCyan.addColorStop(0, 'rgba(0, 229, 255, 0.40)');
-  gradientCyan.addColorStop(0.5, 'rgba(0, 229, 255, 0.12)');
-  gradientCyan.addColorStop(1, 'rgba(0, 229, 255, 0.0)');
-
-  const labels = ['04:00', '06:00', '08:00', '10:00', '12:00', '14:00', 'NOW'];
-  const hydrationData = [94, 91, 88, 86, 92, 90, 89];
-  const metabolismData = [72, 75, 84, 88, 82, 78, 80];
-
-  hydrationChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Hydration Level (%)',
-          data: hydrationData,
-          borderColor: '#00e5ff',
-          borderWidth: 2.2,
-          backgroundColor: gradientCyan,
-          fill: true,
-          tension: 0.35,
-          pointBackgroundColor: '#00e5ff',
-          pointBorderColor: '#ffffff',
-          pointBorderWidth: 1.5,
-          pointRadius: 4,
-          pointHoverRadius: 7,
-          pointHoverBackgroundColor: '#ffffff',
-          pointHoverBorderColor: '#00e5ff',
-        },
-        {
-          label: 'Metabolic Rate (%)',
-          data: metabolismData,
-          borderColor: '#0088ff',
-          borderWidth: 1.8,
-          borderDash: [4, 4],
-          fill: false,
-          tension: 0.3,
-          pointBackgroundColor: '#0088ff',
-          pointBorderColor: '#ffffff',
-          pointBorderWidth: 1,
-          pointRadius: 3,
-          pointHoverRadius: 6
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: {
-        duration: 1200,
-        easing: 'easeOutQuart'
-      },
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          backgroundColor: 'rgba(5, 11, 20, 0.95)',
-          titleColor: '#00e5ff',
-          bodyColor: '#ffffff',
-          borderColor: '#00e5ff',
-          borderWidth: 1,
-          padding: 10,
-          callbacks: {
-            label: (context) => `${context.dataset.label}: ${context.parsed.y}%`
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: {
-            color: 'rgba(0, 229, 255, 0.06)',
-            tickColor: 'rgba(0, 229, 255, 0.2)'
-          },
-          ticks: {
-            color: '#88a7c4'
-          }
-        },
-        y: {
-          min: 60,
-          max: 100,
-          grid: {
-            color: 'rgba(0, 229, 255, 0.08)',
-            tickColor: 'rgba(0, 229, 255, 0.2)'
-          },
-          ticks: {
-            color: '#88a7c4',
-            stepSize: 10,
-            callback: (val) => `${val}%`
-          }
-        }
-      }
-    }
-  });
-}
-
-/**
- * Interactive SVG Silhouette & Floating Tooltip (Strictly Left of Cursor)
- */
-function initSilhouetteInteraction() {
-  const tooltip = document.getElementById('silhouette-tooltip');
-  const tooltipTitle = document.getElementById('tooltip-zone-title');
-  const tooltipLoad = document.getElementById('tooltip-zone-load');
-  const tooltipTemp = document.getElementById('tooltip-zone-temp');
-  const tooltipStatus = document.getElementById('tooltip-zone-status');
-
-  const zoneHead = document.getElementById('zone-head');
-  const zoneChest = document.getElementById('zone-chest');
-  const zoneAbdomen = document.getElementById('zone-abdomen');
-  const zoneKnees = document.getElementById('zone-knees');
-
-  const zones = [zoneHead, zoneChest, zoneAbdomen, zoneKnees].filter(Boolean);
-
-  zones.forEach(zone => {
-    zone.addEventListener('mouseenter', (e) => {
-      const name = zone.getAttribute('data-zone-name') || 'BIOMETRIC ZONE';
-      const load = zone.getAttribute('data-load') || '0%';
-      const temp = zone.getAttribute('data-temp') || '36.6 °C';
-      const status = zone.getAttribute('data-status') || 'NOMINAL';
-
-      if (tooltipTitle) tooltipTitle.textContent = name;
-      if (tooltipLoad) tooltipLoad.textContent = load;
-      if (tooltipTemp) tooltipTemp.textContent = temp;
-      if (tooltipStatus) {
-        tooltipStatus.textContent = status;
-        tooltipStatus.className = 'tooltip-badge';
-        if (status === 'NOMINAL') tooltipStatus.classList.add('status-nominal');
-        else if (status === 'ELEVATED') tooltipStatus.classList.add('status-elevated');
-        else if (status === 'WARNING') tooltipStatus.classList.add('status-warning');
-        else if (status === 'CRITICAL') tooltipStatus.classList.add('status-critical');
-        else tooltipStatus.classList.add('status-nominal');
-      }
-
-      tooltip.style.display = 'flex';
-      positionTooltipLeft(e, tooltip);
-    });
-
-    zone.addEventListener('mousemove', (e) => {
-      positionTooltipLeft(e, tooltip);
-    });
-
-    zone.addEventListener('mouseleave', () => {
-      if (tooltip) tooltip.style.display = 'none';
-    });
-  });
-}
-
-/**
- * Position tooltip strictly to the LEFT of the mouse cursor
- */
-function positionTooltipLeft(e, tooltip) {
-  if (!tooltip) return;
-
-  const offset = 18;
-  const tooltipWidth = tooltip.offsetWidth || 230;
-  const tooltipHeight = tooltip.offsetHeight || 130;
-
-  // Calculate position strictly to the left of cursor
-  let leftPos = e.clientX - tooltipWidth - offset;
-  let topPos = e.clientY;
-
-  // Viewport bounds protection
-  if (leftPos < 10) {
-    // If overflowing left edge of screen, keep within margin
-    leftPos = 10;
   }
-
-  // Vertical viewport clamping
-  const halfHeight = tooltipHeight / 2;
-  if (topPos - halfHeight < 10) {
-    topPos = halfHeight + 10;
-  } else if (topPos + halfHeight > window.innerHeight - 10) {
-    topPos = window.innerHeight - halfHeight - 10;
-  }
-
-  tooltip.style.left = `${leftPos}px`;
-  tooltip.style.top = `${topPos}px`;
-}
-
-/**
- * Simulation Controls UI Listeners & Presets
- */
-function initSimulationControls() {
-  const presetSelect = document.getElementById('sim-preset-select');
-  const sliderRadiation = document.getElementById('slider-radiation');
-  const sliderDays = document.getElementById('slider-days');
-  const sliderStress = document.getElementById('slider-stress');
-
-  const valDispRad = document.getElementById('disp-slider-radiation');
-  const valDispDays = document.getElementById('disp-slider-days');
-  const valDispStress = document.getElementById('disp-slider-stress');
-
-  // Live value readouts
-  if (sliderRadiation && valDispRad) {
-    sliderRadiation.addEventListener('input', (e) => {
-      valDispRad.textContent = `${e.target.value} mSv`;
-    });
-  }
-
-  if (sliderDays && valDispDays) {
-    sliderDays.addEventListener('input', (e) => {
-      valDispDays.textContent = `${e.target.value} d`;
-    });
-  }
-
-  if (sliderStress && valDispStress) {
-    sliderStress.addEventListener('input', (e) => {
-      valDispStress.textContent = `${e.target.value}%`;
-    });
-  }
-
-  // Preset selector quick adjustments
-  if (presetSelect) {
-    const presets = {
-      'nominal': { rad: 42, days: 120, stress: 24 },
-      'eva-high': { rad: 165, days: 180, stress: 58 },
-      'solar-storm': { rad: 420, days: 240, stress: 82 },
-      'deep-space': { rad: 310, days: 680, stress: 72 },
-      'reentry': { rad: 85, days: 420, stress: 65 }
-    };
-
-    presetSelect.addEventListener('change', (e) => {
-      const p = presets[e.target.value];
-      if (!p) return;
-
-      if (sliderRadiation) {
-        sliderRadiation.value = p.rad;
-        if (valDispRad) valDispRad.textContent = `${p.rad} mSv`;
-        sliderRadiation.dispatchEvent(new Event('input'));
-      }
-      if (sliderDays) {
-        sliderDays.value = p.days;
-        if (valDispDays) valDispDays.textContent = `${p.days} d`;
-        sliderDays.dispatchEvent(new Event('input'));
-      }
-      if (sliderStress) {
-        sliderStress.value = p.stress;
-        if (valDispStress) valDispStress.textContent = `${p.stress}%`;
-        sliderStress.dispatchEvent(new Event('input'));
-      }
-    });
-  }
-}
+  window.JournalCharts={render,initBody};
+})();

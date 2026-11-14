@@ -54,7 +54,7 @@
   function validateState(raw, now=Date.now()) {
     if(!raw || raw.version!==1 || !Array.isArray(raw.records) || raw.records.length>365 || !Array.isArray(raw.acknowledgements) || raw.acknowledgements.length>2190 || !raw.tasks || typeof raw.tasks!=='object' || Array.isArray(raw.tasks)) throw Error('Unsupported or invalid journal backup (schema version 1 required).');
     const records=ordered(raw.records.map(r=>{
-      if(r.source!=='manual' || JSON.stringify(r.units)!==JSON.stringify(UNITS)) throw Error('Invalid observation provenance or units.');
+      if(r.source!=='manual' || !r.units || Object.keys(r.units).length!==Object.keys(UNITS).length || Object.entries(UNITS).some(([key,value])=>r.units[key]!==value)) throw Error('Invalid observation provenance or units.');
       return observation(r,now);
     }));
     const ids=new Set(records.map(r=>r.id)); if(ids.size!==records.length) throw Error('Duplicate record IDs.');

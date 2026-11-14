@@ -3,173 +3,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NASA // Biomedical Telemetry Core</title>
-
-  <!-- Google Fonts for High-Tech HUD Styling -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-
-  <!-- Modular CSS Architecture -->
+  <meta name="theme-color" content="#050b14">
+  <title>Orbit Health — Personal crew journal</title>
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
-
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/journal.css">
+  <script defer src="js/vendor/chart.umd.js"></script>
+  <script defer src="js/health-domain.js"></script>
+  <script defer src="js/storage.js"></script>
+  <script defer src="js/charts.js"></script>
+  <script defer src="js/telemetry.js"></script>
+  <script defer src="js/protocols.js"></script>
+  <script defer src="js/journal.js"></script>
 </head>
-<body>
-
-  <!-- Floating HUD Tooltip (Positioned strictly left of cursor) -->
-  <div id="silhouette-tooltip" class="hud-tooltip" role="tooltip" aria-hidden="true">
-    <div class="tooltip-header">
-      <span id="tooltip-zone-title" class="tooltip-title">ZONE TELEMETRY</span>
-      <span id="tooltip-zone-status" class="tooltip-badge status-nominal">NOMINAL</span>
+<body data-mode="journal">
+<a class="skip-link" href="#checkin-form">Skip to daily check-in</a>
+<div class="hud-wrapper">
+  <header class="hud-header">
+    <div class="hud-header-brand"><span class="nasa-logo-badge" aria-hidden="true">OH</span><div class="hud-header-title"><p class="eyebrow">Crew health / personal log</p><h1>Orbit Health</h1><p class="hud-header-subtitle">A daily check-in. A clearer picture over time.</p></div></div>
+    <div class="header-context"><span id="utc-clock"></span><span id="offline-status">Local journal</span><span class="prototype-label">Space Apps prototype · independent team project</span></div>
+  </header>
+  <nav class="mode-nav" aria-label="Workspace"><button id="journal-mode" aria-pressed="true">Personal journal</button><button id="simulation-mode" aria-pressed="false">Mission simulator</button><span id="mode-description">Your observations stay on this device.</span></nav>
+  <div id="storage-warning" class="notice warning" role="alert" hidden></div>
+  <button id="recover-storage" hidden>Download original saved data</button>
+  <div id="app-message" role="status" aria-live="polite"></div>
+  <section class="mission-summary" aria-label="Journal summary"><div><p class="eyebrow" id="summary-label">Daily health overview</p><h2 id="summary-title">Start with today's check-in</h2><p id="summary-detail">No observations yet. Record how you feel and what you measured.</p></div><a class="primary-link journal-only" href="#checkin-form">Record check-in <span aria-hidden="true">↗</span></a></section>
+  <p class="notice">Research prototype for demonstration data. Review rules are illustrative, <strong>not NASA clinical limits</strong>. This app does not diagnose conditions. For severe symptoms, follow your <strong>mission emergency procedure</strong> and contact the crew medical officer.</p>
+  <section class="hud-vitals-grid" aria-label="Latest observations">
+    <article class="vital-card"><div class="vital-card-top"><div class="vital-label-group"><h3 class="vital-label">Resting heart rate</h3><span class="vital-code">Manually recorded</span></div><span id="status-heart-rate" class="vital-status-pill">No data</span></div><div class="vital-value-wrap"><span id="val-heart-rate" class="vital-value">—</span><span class="vital-unit">BPM</span></div></article>
+    <article class="vital-card"><div class="vital-card-top"><div class="vital-label-group"><h3 class="vital-label">Cumulative radiation</h3><span class="vital-code">Manual dosimeter entry</span></div><span id="status-radiation" class="vital-status-pill">No data</span></div><div class="vital-value-wrap"><span id="val-radiation" class="vital-value">—</span><span class="vital-unit">mSv</span></div></article>
+    <article class="vital-card"><div class="vital-card-top"><div class="vital-label-group"><h3 class="vital-label">Bone mineral density</h3><span class="vital-code">Requires a dedicated measurement</span></div><span id="status-bone-mass" class="vital-status-pill">Unavailable</span></div><div class="vital-value-wrap"><span id="val-bone-mass" class="vital-value">—</span><span class="vital-unit">%</span></div></article>
+    <article class="vital-card"><div class="vital-card-top"><div class="vital-label-group"><h3 class="vital-label">Perceived stress</h3><span class="vital-code">Self-report / not a sensor reading</span></div><span id="status-stress" class="vital-status-pill">No data</span></div><div class="vital-value-wrap"><span id="val-stress" class="vital-value">—</span><span class="vital-unit">%</span></div></article>
+  </section>
+  <dl id="secondary-vitals" class="secondary-vitals" aria-label="Additional observations"></dl>
+  <main class="journal-layout">
+    <div class="journal-main">
+      <section class="hud-panel journal-only" id="checkin-panel"><header class="hud-panel-header"><h2 id="form-title">Daily check-in</h2><span class="hud-panel-tag">About 2 minutes</span></header><div class="hud-panel-body">
+        <p class="help">Record resting measurements using your mission-approved equipment. Optional fields can be left blank. Time is shown in your device timezone; records are stored in UTC.</p>
+        <form id="checkin-form" class="checkin-form">
+          <label class="wide">Observation time <input name="observedAt" id="observedAt" type="datetime-local" step="1" required></label>
+          <label>Resting heart rate <span>BPM · required</span><input name="heartRate" id="heartRate" type="number" min="20" max="250" step="1" required inputmode="numeric"></label>
+          <label>Body temperature <span>°C · required</span><input name="temperature" id="temperature" type="number" min="30" max="43" step="0.1" required inputmode="decimal"></label>
+          <label>Sleep in last 24 hours <span>hours · required</span><input name="sleep" id="sleep" type="number" min="0" max="24" step="0.1" required inputmode="decimal"></label>
+          <label>Mood <span>required</span><select name="mood" id="mood" required><option value="">Choose how you feel</option><option value="1">1 — Very low</option><option value="2">2 — Low</option><option value="3">3 — Neutral</option><option value="4">4 — Good</option><option value="5">5 — Very good</option></select></label>
+          <label>Perceived stress <span>0–100% · required</span><input name="stress" id="stress" type="number" min="0" max="100" step="1" required inputmode="numeric"></label>
+          <label>Cumulative dosimeter reading <span>mSv · optional, same mission dosimeter</span><input name="radiation" id="radiation" type="number" min="0" max="10000" step="0.01" inputmode="decimal"></label>
+          <fieldset class="wide pressure-fields"><legend>Blood pressure · mmHg · optional, enter both</legend><label>Systolic <input name="systolic" id="systolic" type="number" min="50" max="260" step="1" inputmode="numeric"></label><label>Diastolic <input name="diastolic" id="diastolic" type="number" min="30" max="180" step="1" inputmode="numeric"></label></fieldset>
+          <label>Fluid intake in last 24 hours <span>mL · optional</span><input name="fluid" id="fluid" type="number" min="0" max="10000" step="1" inputmode="numeric"></label>
+          <label>Exercise in last 24 hours <span>minutes · optional</span><input name="exercise" id="exercise" type="number" min="0" max="1440" step="1" inputmode="numeric"></label>
+          <label class="wide">Context or notes <span>optional · 1000 characters max; avoid personal identifiers</span><textarea name="note" id="note" maxlength="1000" rows="3" placeholder="Measurement context, changes since yesterday…"></textarea></label>
+          <p id="form-error" class="wide error" role="alert"></p>
+          <div class="wide actions"><button type="submit" class="primary" id="save-checkin">Save check-in</button><button type="button" id="cancel-edit" hidden>Cancel edit</button><span class="help">Manual entry · saved locally</span></div>
+        </form>
+      </div></section>
+      <section class="hud-panel" id="simulation-panel" hidden><header class="hud-panel-header"><h2>Mission simulator</h2><span class="hud-panel-tag">Illustrative models</span></header><div class="hud-panel-body sim-controls-form"><p class="notice warning">Simulated data only. Bone density, hydration and body-zone estimates are illustrative and are never saved to your journal.</p>
+        <label>Scenario <select id="sim-preset-select"><option value="nominal">Nominal orbit</option><option value="eva-high">Lunar EVA / high workload</option><option value="solar-storm">Solar particle event</option><option value="deep-space">Extended Mars transit</option><option value="reentry">Re-entry / gravity transition</option><option value="custom">Custom parameters</option></select></label>
+        <label for="slider-radiation">Cumulative radiation <output id="disp-slider-radiation">42 mSv</output></label><input type="range" id="slider-radiation" min="0" max="500" value="42" step="1">
+        <label for="slider-days">Mission duration <output id="disp-slider-days">120 d</output></label><input type="range" id="slider-days" min="1" max="1000" value="120" step="1">
+        <label for="slider-stress">Stress scenario <output id="disp-slider-stress">24%</output></label><input type="range" id="slider-stress" min="0" max="100" value="24" step="1"><button id="reset-simulation">Reset simulation</button>
+      </div></section>
+      <section class="hud-panel"><header class="hud-panel-header"><h2>Trends over time</h2><span id="chart-mode-label" class="hud-panel-tag">Recorded observations</span></header><div class="hud-panel-body"><p id="chart-fallback" class="help" hidden>Charts unavailable. All trend values are available in the table below.</p><h3>Cumulative radiation · mSv</h3><div class="chart-container-box"><canvas id="chart-radiation" role="img" aria-label="Cumulative radiation trend; values in trend table"></canvas></div><h3 id="recovery-chart-title">Sleep · hours / stress · %</h3><div class="chart-container-box"><canvas id="chart-hydration" role="img" aria-label="Recovery trends; values in trend table"></canvas></div><details><summary>View trend values</summary><div class="table-scroll"><table><caption>Values used in charts; — means not recorded</caption><thead id="trend-head"></thead><tbody id="trend-body"></tbody></table></div></details></div></section>
+      <section class="hud-panel journal-only"><header class="hud-panel-header"><h2>Observation history</h2><span id="record-count" class="hud-panel-tag">0 / 365</span></header><div id="journal-history" class="hud-panel-body"></div></section>
     </div>
-    <div class="tooltip-row">
-      <span class="label">BIOMECH LOAD:</span>
-      <span id="tooltip-zone-load" class="val">24%</span>
-    </div>
-    <div class="tooltip-row">
-      <span class="label">LOCAL TEMP:</span>
-      <span id="tooltip-zone-temp" class="val">36.8 °C</span>
-    </div>
-    <div class="tooltip-row">
-      <span class="label">PERFUSION:</span>
-      <span class="val" style="color: var(--neon-cyan);">OPTIMAL</span>
-    </div>
-  </div>
-
-  <div class="hud-wrapper">
-    <!-- ====================================================================
-         HUD Header Bar
-         ==================================================================== -->
-    <header class="hud-header">
-      <div class="hud-header-brand">
-        <span class="nasa-logo-badge">NASA</span>
-        <div class="hud-header-title">
-          <h1>TELEMETRY CORE</h1>
-          <span class="hud-header-subtitle">DEEP SPACE BIOMEDICAL LIFE SUPPORT SYSTEM // ARTEMIS VITAL MATRIX</span>
-        </div>
-      </div>
-
-      <div class="hud-header-telemetry-meta">
-        <div class="meta-item">
-          <span class="meta-label">MISSION ELAPSED TIME</span>
-          <span class="meta-value">MET T+184:14:32</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">SUBJECT ID</span>
-          <span class="meta-value">ASTRO-04 // C. VANCE</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">TELEMETRY LINK</span>
-          <span class="status-pill-nominal">DSN-LOCK 99.8%</span>
-        </div>
-      </div>
-    </header>
-
-    <!-- ====================================================================
-         Top Vital Metrics Row (Mandatory IDs)
-         ==================================================================== -->
-    <section class="hud-vitals-grid" aria-label="Astronaut Vital Signs">
-      <!-- Heart Rate Card -->
-      <article class="vital-card">
-        <div class="vital-card-top">
-          <div class="vital-label-group">
-            <span class="vital-label">HEART RATE</span>
-            <span class="vital-code">CARDIO-ECG / BPM</span>
-          </div>
-          <span id="status-heart-rate" class="vital-status-pill status-nominal">NOMINAL</span>
-        </div>
-        <div class="vital-value-wrap">
-          <span id="val-heart-rate" class="vital-value">72</span>
-          <span class="vital-unit">BPM</span>
-        </div>
-        <div class="vital-bar">
-          <div class="vital-bar-fill" style="width: 68%;"></div>
-        </div>
-      </article>
-
-      <!-- Radiation Dose Card -->
-      <article class="vital-card">
-        <div class="vital-card-top">
-          <div class="vital-label-group">
-            <span class="vital-label">RADIATION EXPOSURE</span>
-            <span class="vital-code">ACCUMULATED / mSv</span>
-          </div>
-          <span id="status-radiation" class="vital-status-pill status-elevated">ELEVATED</span>
-        </div>
-        <div class="vital-value-wrap">
-          <span id="val-radiation" class="vital-value">0.42</span>
-          <span class="vital-unit">mSv/h</span>
-        </div>
-        <div class="vital-bar">
-          <div class="vital-bar-fill warn" style="width: 52%;"></div>
-        </div>
-      </article>
-
-      <!-- Bone Mineral Density Card -->
-      <article class="vital-card">
-        <div class="vital-card-top">
-          <div class="vital-label-group">
-            <span class="vital-label">BONE MINERAL DENSITY</span>
-            <span class="vital-code">MICROGRAVITY / %</span>
-          </div>
-          <span id="status-bone-mass" class="vital-status-pill status-nominal">STABLE</span>
-        </div>
-        <div class="vital-value-wrap">
-          <span id="val-bone-mass" class="vital-value">98.2</span>
-          <span class="vital-unit">%</span>
-        </div>
-        <div class="vital-bar">
-          <div class="vital-bar-fill" style="width: 98%;"></div>
-        </div>
-      </article>
-
-      <!-- Stress & Cognitive Index Card -->
-      <article class="vital-card">
-        <div class="vital-card-top">
-          <div class="vital-label-group">
-            <span class="vital-label">STRESS / COGNITIVE</span>
-            <span class="vital-code">GALVANIC / HRV</span>
-          </div>
-          <span id="status-stress" class="vital-status-pill status-nominal">LOW</span>
-        </div>
-        <div class="vital-value-wrap">
-          <span id="val-stress" class="vital-value">24</span>
-          <span class="vital-unit">%</span>
-        </div>
-        <div class="vital-bar">
-          <div class="vital-bar-fill" style="width: 24%;"></div>
-        </div>
-      </article>
-    </section>
-
-    <!-- ====================================================================
-         Main Mid Section: Silhouette (Left) & Real-Time Charts (Right)
-         ==================================================================== -->
-    <main class="hud-main-grid">
-      <!-- Left Panel: Interactive Human Silhouette & Thermal Scale -->
-      <section class="hud-panel">
-        <header class="hud-panel-header">
-          <div class="hud-panel-title">
-            <span class="title-icon">◈</span>
-            <h2>BIOMETRIC THERMAL SCAN</h2>
-          </div>
-          <span class="hud-panel-tag">ANATOMICAL HUD // 4 ZONES</span>
-        </header>
-
-        <div class="hud-panel-body">
-          <div class="silhouette-stage">
-            <!-- Radar Reticle Background Elements -->
-            <div class="silhouette-radar-circle circle-1"></div>
-            <div class="silhouette-radar-circle circle-2"></div>
-            <div class="scanner-laser"></div>
-
-            <!-- SVG Human Silhouette with 4 Interactive Heat Zones -->
-            <div class="silhouette-svg-container">
-              <svg class="silhouette-svg" viewBox="0 0 260 450" xmlns="http://www.w3.org/2000/svg">
+    <aside class="journal-side">
+      <section class="hud-panel"><header class="hud-panel-header"><h2>Review & next steps</h2><span id="review-count" class="hud-panel-tag"></span></header><div class="hud-panel-body"><p class="help">Prototype review prompts, not medical clearance. Confirm unexpected readings, review mission-approved guidance and consult your crew medical officer. Acknowledging a prompt does not resolve its finding.</p><div id="protocols-container" class="protocols-list"></div></div></section>
+      <section class="hud-panel journal-only"><header class="hud-panel-header"><h2>Today's routine</h2><span id="task-progress" class="hud-panel-tag">0 / 3</span></header><div class="hud-panel-body checklist"><p id="task-date" class="help"></p><label><input type="checkbox" data-task="measurements"> Complete measurement check</label><label><input type="checkbox" data-task="exercise"> Review planned exercise</label><label><input type="checkbox" data-task="wellbeing"> Take a well-being break</label><p class="help">Progress reflects your routine, not fitness for duty.</p></div></section>
+      <section class="hud-panel body-panel"><header class="hud-panel-header"><h2 id="body-title">Explore health domains</h2></header><div class="hud-panel-body"><p id="body-description" class="help">Select a region to find related observations. This is navigation, not a thermal scan.</p><div class="silhouette-stage"><div class="silhouette-svg-container"><svg class="silhouette-svg" viewBox="0 0 260 450" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <!-- Glow Filters -->
                   <filter id="hud-glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
@@ -271,180 +171,14 @@
                   <!-- Joint Connection Guide -->
                   <line x1="104" y1="308" x2="156" y2="308" stroke="rgba(255, 145, 0, 0.4)" stroke-width="1" stroke-dasharray="2 2" />
                 </g>
-              </svg>
-            </div>
-
-            <!-- Vertical Thermal Gradient Scale with Markings (Green to Red) -->
-            <div class="thermal-scale-wrapper" aria-label="Thermal Load Scale">
-              <span class="thermal-scale-title">THERMAL LOAD</span>
-              <div class="thermal-scale-container">
-                <div class="thermal-gradient-bar"></div>
-                <div class="thermal-scale-divisions">
-                  <span class="scale-mark crit">100%</span>
-                  <span class="scale-mark warn">75%</span>
-                  <span class="scale-mark elev">50%</span>
-                  <span class="scale-mark nom">25%</span>
-                  <span class="scale-mark opt">0%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Right Panel: Real-Time Charts (Chart.js) -->
-      <section class="charts-column">
-        <!-- Radiation Exposure Chart -->
-        <article class="hud-panel chart-card">
-          <header class="hud-panel-header">
-            <div class="hud-panel-title">
-              <span class="title-icon" style="color: var(--status-critical);">▲</span>
-              <h2>RADIATION EXPOSURE (mSv)</h2>
-            </div>
-            <div class="chart-legend-indicator">
-              <span class="chart-dot red"></span>
-              <span>ACCUMULATED SPE / GCR FLUX</span>
-            </div>
-          </header>
-          <div class="hud-panel-body">
-            <div class="chart-container-box">
-              <canvas id="chart-radiation"></canvas>
-            </div>
-          </div>
-        </article>
-
-        <!-- Hydration & Metabolism Chart -->
-        <article class="hud-panel chart-card">
-          <header class="hud-panel-header">
-            <div class="hud-panel-title">
-              <span class="title-icon" style="color: var(--neon-cyan);">◆</span>
-              <h2>HYDRATION & METABOLISM (%)</h2>
-            </div>
-            <div class="chart-legend-indicator">
-              <span class="chart-dot cyan"></span>
-              <span>ELECTROLYTE & METABOLIC FLUX</span>
-            </div>
-          </header>
-          <div class="hud-panel-body">
-            <div class="chart-container-box">
-              <canvas id="chart-hydration"></canvas>
-            </div>
-          </div>
-        </article>
-      </section>
-    </main>
-
-    <!-- ====================================================================
-         Bottom Section: Simulation Controls & Medical Protocols
-         ==================================================================== -->
-    <section class="hud-bottom-grid">
-      <!-- Simulation Controls Panel -->
-      <article class="hud-panel">
-        <header class="hud-panel-header">
-          <div class="hud-panel-title">
-            <span class="title-icon">⚙</span>
-            <h2>MISSION SIMULATION PARAMETERS</h2>
-          </div>
-          <span class="hud-panel-tag">SIM-CORE V2.4</span>
-        </header>
-
-        <div class="hud-panel-body">
-          <form class="sim-controls-form" onsubmit="return false;">
-            <!-- Simulation Scenario Preset Select -->
-            <div class="form-group">
-              <div class="form-label-row">
-                <label for="sim-preset-select" class="form-label">SCENARIO PRESET</label>
-                <span class="form-value-pill">ACTIVE</span>
-              </div>
-              <select id="sim-preset-select" class="sim-select">
-                <option value="nominal">Nominal Low-Earth Orbit (Baseline)</option>
-                <option value="eva-high">Lunar Surface EVA (High Physical Load)</option>
-                <option value="solar-storm">Solar Particle Event (SPE Storm Alert)</option>
-                <option value="deep-space">Deep Space Mars Transit (Extended Day 600+)</option>
-                <option value="reentry">Atmospheric Re-entry & Gravitational Strain</option>
-              </select>
-            </div>
-
-            <!-- Radiation Slider -->
-            <div class="form-group">
-              <div class="form-label-row">
-                <label for="slider-radiation" class="form-label">RADIATION RATE (mSv)</label>
-                <span id="disp-slider-radiation" class="form-value-pill">42 mSv</span>
-              </div>
-              <input type="range" id="slider-radiation" class="sim-slider" min="0" max="500" value="42" step="1">
-            </div>
-
-            <!-- Days in Orbit Slider -->
-            <div class="form-group">
-              <div class="form-label-row">
-                <label for="slider-days" class="form-label">DAYS IN ORBIT</label>
-                <span id="disp-slider-days" class="form-value-pill">120 d</span>
-              </div>
-              <input type="range" id="slider-days" class="sim-slider" min="1" max="1000" value="120" step="1">
-            </div>
-
-            <!-- Stress Level Slider -->
-            <div class="form-group">
-              <div class="form-label-row">
-                <label for="slider-stress" class="form-label">PHYSIOLOGICAL STRESS INDEX</label>
-                <span id="disp-slider-stress" class="form-value-pill">24%</span>
-              </div>
-              <input type="range" id="slider-stress" class="sim-slider" min="0" max="100" value="24" step="1">
-            </div>
-          </form>
-        </div>
-      </article>
-
-      <!-- Action Protocols Container -->
-      <article class="hud-panel">
-        <header class="hud-panel-header">
-          <div class="hud-panel-title">
-            <span class="title-icon">✚</span>
-            <h2>ACTION PROTOCOLS & COUNTERMEASURES</h2>
-          </div>
-          <span class="hud-panel-tag">DYNAMIC ENGINE</span>
-        </header>
-
-        <div class="hud-panel-body">
-          <div id="protocols-container" class="protocols-list">
-            <!-- Dynamic Protocol Card 1 -->
-            <div class="protocol-card p-crit">
-              <div class="protocol-card-head">
-                <span class="protocol-title">RADIATION STORM SHELTER PROTOCOL</span>
-                <span class="protocol-badge status-critical">PRIORITY-1</span>
-              </div>
-              <p class="protocol-desc">Direct astronaut to water-shielded habitat storm shelter. Activate active electromagnetic deflectors and administer radioprotective antioxidants (Amifostine analogue).</p>
-              <button type="button" class="protocol-action-btn">EXECUTE PROTOCOL // SEC-01</button>
-            </div>
-
-            <!-- Dynamic Protocol Card 2 -->
-            <div class="protocol-card p-warn">
-              <div class="protocol-card-head">
-                <span class="protocol-title">MUSCULOSKELETAL JOINT COMPRESSION</span>
-                <span class="protocol-badge status-warning">ELEVATED</span>
-              </div>
-              <p class="protocol-desc">Knee and lower limb joint thermal sensors indicate localized overload (76%). Schedule 45-min ARED pneumatic resistance cycle with cooling cuffs.</p>
-              <button type="button" class="protocol-action-btn">SCHEDULE ARED SESSION</button>
-            </div>
-
-            <!-- Dynamic Protocol Card 3 -->
-            <div class="protocol-card p-nom">
-              <div class="protocol-card-head">
-                <span class="protocol-title">ELECTROLYTE & FLUID REHYDRATION</span>
-                <span class="protocol-badge status-nominal">ROUTINE</span>
-              </div>
-              <p class="protocol-desc">Metabolic rate elevated after EVA. Dispense 650 ml isotonic electrolyte solution to prevent cephalad fluid redistribution dehydration.</p>
-              <button type="button" class="protocol-action-btn">DISPENSE HYDRATION PACK</button>
-            </div>
-          </div>
-        </div>
-      </article>
-    </section>
-  </div>
-
-  <!-- JavaScript Scripts: UI & Logic Stubs -->
-  <script src="js/charts.js"></script>
-  <script src="js/telemetry.js"></script>
-  <script src="js/protocols.js"></script>
+              </svg></div></div><p id="body-detail" class="help" aria-live="polite">Head: sleep and well-being · Chest: heart and pressure · Core: temperature and fluids · Knees: activity.</p></div></section>
+      <section class="hud-panel journal-only"><header class="hud-panel-header"><h2>Backup & handover</h2></header><div class="hud-panel-body backup-panel"><p class="help">Local downloads only. Browser storage and backups are unencrypted: use demonstration data. Anyone with access to this browser profile may read the journal.</p><div class="actions"><button id="export-json">Download JSON backup</button><button id="export-csv">Export observations CSV</button></div><label>Restore or merge JSON backup<input type="file" id="import-file" accept=".json,application/json"></label><div id="import-preview" hidden><p id="import-detail"></p><div class="actions"><button id="confirm-import">Confirm merge</button><button id="cancel-import">Cancel</button></div></div></div></section>
+      <section class="hud-panel"><header class="hud-panel-header"><h2>Why these observations?</h2></header><div class="hud-panel-body resources"><p>Designed around the five hazards of human spaceflight. These sources explain the risk domains; they do not validate this prototype's numerical rules.</p><a href="https://www.spaceappschallenge.org/2026/challenges/health-monitoring-software/?tab=resources" target="_blank" rel="noopener noreferrer">NASA Space Apps challenge & resources ↗</a><a href="https://www.nasa.gov/hrp/hazards/" target="_blank" rel="noopener noreferrer">NASA · Five hazards of spaceflight ↗</a><a href="https://www.nasa.gov/hrp/risks/" target="_blank" rel="noopener noreferrer">NASA · Human spaceflight risks ↗</a><a href="https://www.nasa.gov/hrp/ongoing-hrp-research/" target="_blank" rel="noopener noreferrer">NASA · Ongoing HRP research ↗</a><a href="https://www.asc-csa.gc.ca/eng/news/articles/2026/2026-02-26-monitoring-radiation-astronaut-health.asp" target="_blank" rel="noopener noreferrer">CSA · Radiation monitoring ↗</a><a href="https://www.asc-csa.gc.ca/eng/iss/science/why-do-we-conduct-science-experiments-in-space.asp" target="_blank" rel="noopener noreferrer">CSA · Research and autonomy ↗</a></div></section>
+    </aside>
+  </main>
+  <footer><span>Orbit Health · NASA Space Apps 2026 team prototype</span><span>No sensor feed connected · No data transmitted to Earth</span></footer>
+</div>
+<div id="silhouette-tooltip" class="hud-tooltip" role="tooltip" aria-hidden="true"><span id="tooltip-zone-title"></span><span id="tooltip-zone-status"></span><span id="tooltip-zone-load"></span><span id="tooltip-zone-temp"></span></div>
+<noscript><p class="notice warning">Enable JavaScript to use the local journal. No records have been submitted.</p></noscript>
 </body>
 </html>
