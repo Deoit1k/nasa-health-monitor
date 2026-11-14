@@ -89,3 +89,22 @@ test('protocol rules prioritize hazards and clear when baseline is restored', ()
   assert.equal(baseline.length, 1);
   assert.equal(baseline[0].id, 'routine');
 });
+
+test('sensor microvariation stays bounded while accumulated dose remains monotonic', () => {
+  const model = loadModel();
+  for (const [preset, defaults] of Object.entries(model.presets)) {
+    const inputs = { preset, ...defaults };
+    const samples = Array.from({ length: 120 }, (_, second) => model.calculateBiometrics(inputs, second));
+    for (const [index, state] of samples.entries()) {
+      assert.ok(Number.isFinite(state.radiationReading));
+      assert.ok(Math.abs(state.radiationReading - state.radiation) <= state.radiation * 0.01);
+      if (index) assert.ok(state.radiation >= samples[index - 1].radiation);
+    }
+    for (const key of ['radiationReading', 'hydration', 'metabolism']) {
+      const values = samples.map(state => state[key]);
+      assert.ok(Math.max(...values) - Math.min(...values) > 0.1, `${preset}: ${key}`);
+    }
+    assert.deepEqual(model.calculateBiometrics(inputs, 8.5), model.calculateBiometrics(inputs, 8.5));
+  }
+  assert.equal(model.calculateBiometrics({ radiation: 0 }, 30).radiationReading, 0);
+});

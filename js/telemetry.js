@@ -24,6 +24,19 @@
     return statusNames[value >= critical ? 3 : value >= warning ? 2 : value >= elevated ? 1 : 0];
   }
 
+  // Smooth seeded noise: reproducible sensor drift, without independent jumps each tick.
+  function sensorNoise(seconds, seed) {
+    const position = seconds / 3;
+    const index = Math.floor(position);
+    const fraction = position - index;
+    const blend = fraction * fraction * (3 - 2 * fraction);
+    const random = step => {
+      const value = Math.sin(step * 127.1 + seed * 311.7) * 43758.5453;
+      return (value - Math.floor(value)) * 2 - 1;
+    };
+    return random(index) * (1 - blend) + random(index + 1) * blend;
+  }
+
   function calculateBiometrics(inputs = {}, elapsedSeconds = 0) {
     const preset = Object.prototype.hasOwnProperty.call(presets, inputs.preset) ? inputs.preset : 'nominal';
     const defaults = presets[preset];
@@ -38,13 +51,18 @@
       + physicalLoad * 10 + isolation + radiationRate * 2 + wave, 0, 100);
     const heartRate = clamp(60 + physicalLoad * 42 + stress * 0.24 + wave, 45, 190);
     const radiation = radiationRate * missionDays;
+    // Sensor readout may fluctuate (< 1%); true accumulated dose never decreases.
+    const radiationReading = radiation * (1 + Math.min(1, elapsed / 3)
+      * (0.006 * Math.sin(elapsed / 3.5) + 0.002 * sensorNoise(elapsed, 1)));
     // Moderate exercise mitigates loss; very high load adds short-term strain.
     const exerciseBenefit = Math.min(physicalLoad, 0.5) * 0.018;
     const boneMass = clamp(100 - missionDays * (0.025 - exerciseBenefit)
       - Math.max(0, physicalLoad - 0.6) * 2, 50, 100);
     const hydration = clamp(98 - physicalLoad * 19 - stress * 0.1
-      - Math.min(6, missionDays / 200) + wave * 0.3, 40, 100);
-    const metabolism = clamp(59 + physicalLoad * 30 + stress * 0.15 + wave * 0.5, 0, 100);
+      - Math.min(6, missionDays / 200) + 1.1 * Math.sin(elapsed / 3.8)
+      + 0.15 * sensorNoise(elapsed, 2), 40, 100);
+    const metabolism = clamp(59 + physicalLoad * 30 + stress * 0.15
+      + 1.3 * Math.sin(elapsed / 4.7) + 0.18 * sensorNoise(elapsed, 3), 0, 100);
     const boneStrain = (100 - boneMass) * 2;
     const radiationStrain = Math.min(30, radiation / 25 + radiationRate * 2);
     const loads = {
@@ -66,7 +84,7 @@
     });
     return {
       preset, days, missionDays, elapsedSeconds: elapsed, physicalLoad,
-      heartRate, radiationRate, radiation, boneMass, stress, hydration, metabolism, zones,
+      heartRate, radiationRate, radiation, radiationReading, boneMass, stress, hydration, metabolism, zones,
       statuses: {
         heartRate: band(heartRate, 100, 120, 145),
         radiation: statusNames[Math.max(statusNames.indexOf(band(radiation, 100, 250, 500)),
@@ -133,9 +151,9 @@
 
   function publish(reason) {
     state = calculateBiometrics(inputs, Math.max(0, (Date.now() - origin) / 1000));
-    history.push({ missionDays: state.missionDays, radiation: state.radiation,
+    history.push({ elapsedSeconds: state.elapsedSeconds, radiation: state.radiationReading,
       hydration: state.hydration, metabolism: state.metabolism });
-    if (history.length > 60) history.shift();
+    if (history.length > 15) history.shift();
     renderState();
     document.dispatchEvent(new CustomEvent('telemetry:update', {
       detail: { state, history: history.slice(), reason }
