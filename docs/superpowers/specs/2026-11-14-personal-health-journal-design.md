@@ -1,6 +1,6 @@
 # Personal astronaut health journal
 
-Status: proposed for user approval. Date: 2026-11-14.
+Status: approved by user. Date: 2026-11-14.
 
 ## Intent and chosen approach
 
