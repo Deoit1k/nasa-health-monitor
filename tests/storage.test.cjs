@@ -14,3 +14,7 @@ test('unavailable storage and quota failures return usable session with explicit
  const broken={getItem:()=>{throw Error('blocked');},setItem:()=>{throw Error('quota');}};
  assert.ok(S.load(broken).error); assert.ok(S.save(broken,D.empty()).error);
 });
+test('failed initial read never overwrites unread data if storage later becomes writable',()=>{
+ let writes=0;const store={getItem:()=>{throw Error('temporary failure');},setItem:()=>writes++};
+ const loaded=S.load(store);assert.equal(loaded.blocked,true);S.save(store,D.empty(),loaded.blocked);assert.equal(writes,0);
+});

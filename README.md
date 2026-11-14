@@ -22,10 +22,10 @@ After the first successful HTTP load, wait for “Offline cache ready”. Reload
 2. Optionally enter paired blood pressure, cumulative dose from the same mission dosimeter, total fluid intake and exercise in the last 24 hours, and context.
 3. Review prompts explain exactly what triggered them. “Mark reviewed” records acknowledgement, not recovery or medical clearance. Severe symptoms require the mission emergency procedure and crew medical officer, regardless of app output.
 4. Check off daily routine items. These are per UTC day and do not represent fitness for duty.
-5. Review history and trends. Edit observations to correct errors; corrections invalidate their previous acknowledgements. Readings over 24 hours old are explicitly stale.
+5. Review history and trends. Use **Review** beside any historical observation to open its own prompts. Edit observations to correct errors; corrections invalidate their previous acknowledgements. Backdated dose corrections/insertions/imports also invalidate later radiation acknowledgements when their dose context changes. Readings over 24 hours old are explicitly stale.
 6. Download a JSON backup, or CSV observations for handover. Import JSON using the preview and explicit confirmation; nothing changes on validation failure or cancel.
 
-Missing optional measurements stay missing, including gaps in radiation charts. Bone density and local thermal load are not inferred in the journal. Charts connect discrete observed samples and use observation timestamps; sleep and stress use separate labeled axes. The table below the charts gives their exact values.
+Missing optional measurements stay missing, including gaps in radiation charts. Bone density and local thermal load are not inferred in the journal. Charts connect discrete observed samples and use a linear elapsed-time axis with UTC labels, preserving unequal gaps between observations; sleep and stress use separate labeled axes. The table below the charts gives their exact values.
 
 ## Demo script (3 minutes)
 
@@ -70,13 +70,13 @@ Storage key: `astronaut-health-journal-v1`. Schema version: `1`.
 
 - `records`: at most 365 observations, sorted by ISO UTC observation timestamp and ID. Each carries a UUID, `source: "manual"`, an explicit units map, required numeric observations, nullable optional fields and a note of at most 1000 characters. Simulator state is never persisted here.
 - Units: heart rate BPM; temperature °C; sleep h; mood 1–5; stress %; pressure mmHg; **cumulative** radiation mSv; fluid mL; exercise min.
-- `acknowledgements`: bounded record/rule/timestamp events. Editing a record invalidates its acknowledgements.
+- `acknowledgements`: bounded record/rule/timestamp events; timestamps cannot precede the referenced observation. Editing a record invalidates its acknowledgements. Changes to a preceding dose context invalidate dependent radiation reviews.
 - `tasks`: boolean routine items keyed by UTC date, retaining at most 366 dates. Checklist retention does not delete observations.
 - Broad input bounds (see `HealthDomain.BOUNDS`) reject implausible data-entry values, not diagnose disease. Pressure requires both values and systolic > diastolic. Dates cannot be future, mood must be a whole number, and dose cannot decrease across the full chronological history, including backdated edits.
 - Capacity is never resolved by silently dropping observations. At 365 records, new entries/imports are rejected while existing records remain editable and exportable.
 - JSON imports are limited to 2 MB and validated atomically, including units, provenance, duplicates, tasks, review metadata and radiation order. Identical IDs/values deduplicate; conflicting IDs reject the entire merge. Existing review/routine values take precedence on metadata conflicts. A changed journal between preview and confirmation is revalidated.
 - CSV quotes text and neutralizes spreadsheet formula prefixes. Imported text is rendered with `textContent`; source links are defined by code, not imported data.
-- Corrupt saved data is never overwritten. The original is downloadable for recovery while the new in-memory session can be exported. Storage/quota failures show a persistent warning. A change in another browser tab protects this tab against further writes; export and reload to reconcile.
+- Unread or corrupt saved data is never overwritten, even if a failed initial read is followed by restored write access. Corrupt original text is downloadable for recovery while the new in-memory session can be exported. Storage/quota failures show a persistent warning. A change in another browser tab protects this tab against further writes; export and reload to reconcile.
 
 ## Architecture and tests
 

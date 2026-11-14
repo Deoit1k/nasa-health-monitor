@@ -9,7 +9,7 @@
       const gradient=ctx.createLinearGradient(0,0,0,190);
       gradient.addColorStop(0,i===0&&axes==='radiation'?'rgba(255,42,85,.25)':'rgba(0,229,255,.18)');gradient.addColorStop(1,'rgba(0,0,0,0)');
       return {label:name,data:[],borderColor:axes==='radiation'?colors[0]:colors[i+1],backgroundColor:gradient,fill:i===0,borderWidth:2,pointRadius:3,tension:0,spanGaps:false,yAxisID:axes==='recovery'&&i===1?'stress':'y'};
-    })},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:axes!=='radiation',labels:{color:'#afc2d3',font:{size:11}}}},scales:{x:{grid:{color:'#172d3e'},ticks:{color:'#91a7bb',maxTicksLimit:4,maxRotation:0}},y:{beginAtZero:true,grid:{color:'#172d3e'},ticks:{color:'#91a7bb'},...(axes==='recovery'?{title:{display:true,text:'Sleep (h)',color:'#afc2d3'},suggestedMax:10}:{title:{display:true,text:'mSv',color:'#afc2d3'}})},...(axes==='recovery'?{stress:{position:'right',min:0,max:100,grid:{drawOnChartArea:false},ticks:{color:'#91a7bb'},title:{display:true,text:'Stress (%)',color:'#afc2d3'}}}:{})}}});
+    })},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:axes!=='radiation',labels:{color:'#afc2d3',font:{size:11}}}},scales:{x:{type:'linear',grid:{color:'#172d3e'},ticks:{color:'#91a7bb',maxTicksLimit:4,maxRotation:0}},y:{beginAtZero:true,grid:{color:'#172d3e'},ticks:{color:'#91a7bb'},...(axes==='recovery'?{title:{display:true,text:'Sleep (h)',color:'#afc2d3'},suggestedMax:10}:{title:{display:true,text:'mSv',color:'#afc2d3'}})},...(axes==='recovery'?{stress:{position:'right',min:0,max:100,grid:{drawOnChartArea:false},ticks:{color:'#91a7bb'},title:{display:true,text:'Stress (%)',color:'#afc2d3'}}}:{})}}});
   }
   function render(records,mode) {
     const demo=mode==='simulation';
@@ -19,11 +19,19 @@
     // Recreate for axes/units when changing between actual recovery and modeled percentages.
     if(hydrationChartInstance && hydrationChartInstance.demo!==demo) {hydrationChartInstance.destroy();hydrationChartInstance=null;}
     if(!hydrationChartInstance){hydrationChartInstance=chart(recovery,demo?['Modeled hydration (%)','Modeled metabolism (%)']:['Sleep (h)','Stress (%)'],demo?'percent':'recovery');hydrationChartInstance.demo=demo;if(demo){hydrationChartInstance.options.scales.y.max=100;hydrationChartInstance.options.scales.y.title.text='%';}}
-    const labels=records.map(r=>demo?`Day ${r.days}`:new Date(r.observedAt).toISOString().slice(5,16).replace('T',' ')+'Z');
-    radiationChartInstance.data.labels=labels;radiationChartInstance.data.datasets[0].data=records.map(r=>r.radiation);radiationChartInstance.update('none');
-    hydrationChartInstance.data.labels=labels;
-    hydrationChartInstance.data.datasets[0].data=records.map(r=>demo?r.hydration:r.sleep);
-    hydrationChartInstance.data.datasets[1].data=records.map(r=>demo?r.metabolism:r.stress);hydrationChartInstance.update('none');
+    const xs=records.map(r=>demo?r.days:Date.parse(r.observedAt));
+    const points=field=>records.map((r,i)=>({x:xs[i],y:r[field]}));
+    radiationChartInstance.data.datasets[0].data=points('radiation');
+    hydrationChartInstance.data.datasets[0].data=points(demo?'hydration':'sleep');
+    hydrationChartInstance.data.datasets[1].data=points(demo?'metabolism':'stress');
+    for(const instance of [radiationChartInstance,hydrationChartInstance]) {
+      const axis=instance.options.scales.x, minimum=Math.min(...xs),maximum=Math.max(...xs);
+      axis.min=xs.length?minimum-(minimum===maximum?(demo?.5:1800000):0):undefined;
+      axis.max=xs.length?maximum+(minimum===maximum?(demo?.5:1800000):0):undefined;
+      axis.ticks.callback=value=>demo?`Day ${value}`:new Date(value).toISOString().slice(5,16).replace('T',' ')+'Z';
+      instance.options.plugins.tooltip={callbacks:{title:items=>demo?`Day ${items[0].parsed.x}`:new Date(items[0].parsed.x).toISOString().replace('T',' ').slice(0,19)+' UTC'}};
+      instance.update('none');
+    }
   }
   function initBody() {
     const tooltip=document.getElementById('silhouette-tooltip');

@@ -4,7 +4,7 @@
   const D=HealthDomain, $=id=>document.getElementById(id);
   const storage={getItem:key=>window.localStorage.getItem(key),setItem:(key,value)=>window.localStorage.setItem(key,value)};
   const loaded=JournalStore.load(storage);
-  let state=loaded.state,mode='journal',editing=null,pendingImport=null;
+  let state=loaded.state,mode='journal',editing=null,pendingImport=null,selectedReviewId=null;
   const localTime=iso=>{const date=iso?new Date(iso):new Date();return new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,19);};
   const utc=iso=>new Date(iso).toISOString().slice(0,19).replace('T',' ')+' UTC';
   const element=(tag,value,cls)=>{const n=document.createElement(tag);if(value!==undefined)n.textContent=value;if(cls)n.className=cls;return n;};
@@ -19,7 +19,7 @@
     for(const [key,value] of Object.entries(record)){const input=$('checkin-form').elements.namedItem(key);if(input)input.value=key==='observedAt'?localTime(value):value??'';}
     $('form-title').textContent='Edit observation';$('save-checkin').textContent='Save correction';$('cancel-edit').hidden=false;$('form-error').textContent='';$('observedAt').focus();$('checkin-panel').scrollIntoView({block:'start'});
   }
-  function review(ruleId){const r=latest();if(!r || mode!=='journal')return;if(state.acknowledgements.some(a=>a.recordId===r.id&&a.ruleId===ruleId))return;state={...state,acknowledgements:[...state.acknowledgements,{recordId:r.id,ruleId,at:new Date().toISOString()}]};save();render();message('Review recorded. The observation and finding remain visible.');}
+  function review(ruleId){const r=D.reviewContext(state,selectedReviewId).record;if(!r || mode!=='journal')return;if(state.acknowledgements.some(a=>a.recordId===r.id&&a.ruleId===ruleId))return;state={...state,acknowledgements:[...state.acknowledgements,{recordId:r.id,ruleId,at:new Date().toISOString()}]};save();render();message('Review recorded. The observation and finding remain visible.');}
   function renderHistory(){
     const node=$('journal-history');node.replaceChildren();$('record-count').textContent=`${state.records.length} / 365`;
     if(!state.records.length){node.append(element('p','Your journal is empty. Your first check-in will appear here.','help'));return;}
@@ -27,7 +27,9 @@
       const row=element('article',undefined,'history-entry'),details=element('div'),time=element('time',utc(r.observedAt));time.dateTime=r.observedAt;
       details.append(time,element('p',`${r.heartRate} BPM · ${r.temperature} °C · sleep ${r.sleep} h · mood ${r.mood}/5 · stress ${r.stress}% · ${r.radiation===null?'dose not recorded':r.radiation+' mSv'}`));
       if(r.note)details.append(element('p',r.note));
-      const button=element('button','Edit');button.type='button';button.setAttribute('aria-label',`Edit observation ${utc(r.observedAt)}`);button.addEventListener('click',()=>edit(r));row.append(details,button);node.append(row);
+      const actions=element('div',undefined,'actions');
+      const view=element('button','Review');view.type='button';view.setAttribute('aria-label',`Review observation ${utc(r.observedAt)}`);view.addEventListener('click',()=>{selectedReviewId=r.id;render();$('review-context').focus();$('review-context').scrollIntoView({block:'center'});});
+      const button=element('button','Edit');button.type='button';button.setAttribute('aria-label',`Edit observation ${utc(r.observedAt)}`);button.addEventListener('click',()=>edit(r));actions.append(view,button);row.append(details,actions);node.append(row);
     }
   }
   function renderTrends(records){
@@ -59,7 +61,10 @@
     document.querySelectorAll('.journal-only').forEach(n=>n.hidden=demo);$('simulation-panel').hidden=!demo;
     $('journal-mode').setAttribute('aria-pressed',String(!demo));$('simulation-mode').setAttribute('aria-pressed',String(demo));
     $('mode-description').textContent=demo?'Simulation is separate from your journal.':'Your observations stay on this device.';
-    Telemetry.render(record,mode);Protocols.render(record,demo?null:previousDose(),demo?[]:state.acknowledgements,review);
+    const context=demo?{record,previousDose:null}:D.reviewContext(state,selectedReviewId);
+    Telemetry.render(record,mode);Protocols.render(context.record,context.previousDose,demo?[]:state.acknowledgements,review);
+    $('review-context').textContent=demo?'Simulated scenario · not saved':context.record?`Reviewing: ${utc(context.record.observedAt)}${context.record.id!==latest()?.id?' · historical observation':''}`:'No observation selected';
+    $('review-latest').hidden=demo||!context.record||context.record.id===latest()?.id;
     renderSummary(record);renderTrends(demo?[record]:state.records);renderHistory();renderTasks();
     $('utc-clock').textContent=new Date().toISOString().slice(0,16).replace('T',' ')+' UTC';
   }
@@ -69,10 +74,11 @@
       const data=Object.fromEntries(new FormData(event.currentTarget)),date=new Date(data.observedAt);
       if(!Number.isFinite(date.getTime()))throw Error('Choose a valid observation time.');
       data.observedAt=date.toISOString();data.id=editing||crypto.randomUUID();
-      const record=D.observation(data);state=D.upsert(state,record);save();resetForm();render();message('Check-in saved in this session. Review the observations and any prompts below.');
+      const record=D.observation(data);state=D.upsert(state,record);selectedReviewId=record.id;save();resetForm();render();message('Check-in saved in this session. Review the observations and any prompts below.');
     }catch(error){$('form-error').textContent=error.message;}
   });
   $('cancel-edit').addEventListener('click',resetForm);
+  $('review-latest').addEventListener('click',()=>{selectedReviewId=null;render();});
   $('journal-mode').addEventListener('click',()=>{mode='journal';render();message('Personal journal opened. Simulation values were not saved.');});
   $('simulation-mode').addEventListener('click',()=>{mode='simulation';render();message('Simulation opened. Your journal stays separate.');});
   document.querySelectorAll('[data-task]').forEach(input=>input.addEventListener('change',()=>{

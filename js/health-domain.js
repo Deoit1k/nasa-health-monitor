@@ -49,7 +49,16 @@
     return sorted;
   }
   function upsert(state, record) {
-    return {...state,records:ordered([...state.records.filter(r=>r.id!==record.id),record]),acknowledgements:state.acknowledgements.filter(a=>a.recordId!==record.id)};
+    const records=ordered([...state.records.filter(r=>r.id!==record.id),record]);
+    const acknowledgements=reconcileRadiation(state.acknowledgements.filter(a=>a.recordId!==record.id),state.records,records);
+    return {...state,records,acknowledgements};
+  }
+  function doseContext(records,id) {
+    const {record,previousDose}=reviewContext({records},id);
+    return JSON.stringify([record?.radiation,previousDose?[previousDose.id,previousDose.observedAt,previousDose.radiation]:null]);
+  }
+  function reconcileRadiation(acks,before,after) {
+    return acks.filter(a=>a.ruleId!=='radiation'||doseContext(before,a.recordId)===doseContext(after,a.recordId));
   }
   function validateState(raw, now=Date.now()) {
     if(!raw || raw.version!==1 || !Array.isArray(raw.records) || raw.records.length>365 || !Array.isArray(raw.acknowledgements) || raw.acknowledgements.length>2190 || !raw.tasks || typeof raw.tasks!=='object' || Array.isArray(raw.tasks)) throw Error('Unsupported or invalid journal backup (schema version 1 required).');
@@ -62,7 +71,9 @@
     const acknowledgements=raw.acknowledgements.map(a=>{
       if(!a || !ids.has(a.recordId)||!RULES.includes(a.ruleId)) throw Error('Invalid review event.');
       const key=a.recordId+':'+a.ruleId; if(acknowledgementKeys.has(key)) throw Error('Duplicate review event.'); acknowledgementKeys.add(key);
-      return {recordId:a.recordId,ruleId:a.ruleId,at:timestamp(a.at,now)};
+      const at=timestamp(a.at,now);
+      if(at<records.find(r=>r.id===a.recordId).observedAt)throw Error('Review timestamp precedes its observation.');
+      return {recordId:a.recordId,ruleId:a.ruleId,at};
     });
     const tasks={}; if(Object.keys(raw.tasks).length>366) throw Error('Too many checklist dates.');
     for(const [date,values] of Object.entries(raw.tasks)) {
@@ -78,10 +89,17 @@
       if(byId.has(record.id) && JSON.stringify(byId.get(record.id))!==JSON.stringify(record)) throw Error(`Conflicting record ${record.id}. Existing data was not changed.`);
       byId.set(record.id,record);
     }
-    const acks=new Map([...b.acknowledgements,...a.acknowledgements].map(v=>[v.recordId+':'+v.ruleId,v]));
+    const records=ordered([...byId.values()]);
+    const acks=new Map([...reconcileRadiation(b.acknowledgements,b.records,records),...reconcileRadiation(a.acknowledgements,a.records,records)].map(v=>[v.recordId+':'+v.ruleId,v]));
     const tasks={...a.tasks};
     for(const [day,items] of Object.entries(b.tasks)) {tasks[day]={...items,...tasks[day]};}
-    return validateState({version:1,records:[...byId.values()],acknowledgements:[...acks.values()],tasks},now);
+    return validateState({version:1,records,acknowledgements:[...acks.values()],tasks},now);
+  }
+  function reviewContext(state, selectedId) {
+    const record=state.records.find(r=>r.id===selectedId)||state.records.at(-1)||null;
+    const index=record?state.records.findIndex(r=>r.id===record.id):-1;
+    const previousDose=[...state.records.slice(0,Math.max(0,index))].reverse().find(r=>r.radiation!==null)||null;
+    return {record,previousDose};
   }
   function evaluate(r, previous) {
     if(!r)return [];
@@ -109,5 +127,5 @@
     }
     return {source:'simulated',heartRate:Math.round(62+stress*.65),temperature:36.6,sleep:Math.round((8-stress*.04)*10)/10,mood:stress>=70?2:4,stress,radiation,systolic:null,diastolic:null,bone:Math.max(70,100-days*.015),hydration:Math.max(50,98-stress*.25),metabolism:Math.min(100,60+stress*.4),days,zones};
   }
-  return {UNITS,BOUNDS,SOURCES,TASKS,empty,observation,upsert,validateState,merge,evaluate,csv,simulate};
+  return {UNITS,BOUNDS,SOURCES,TASKS,empty,observation,upsert,validateState,merge,reviewContext,evaluate,csv,simulate};
 });

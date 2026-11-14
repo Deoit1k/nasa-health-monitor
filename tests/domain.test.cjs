@@ -55,3 +55,22 @@ test('backup accepts equivalent units regardless of JSON property ordering',()=>
  const s=D.upsert(D.empty(),record());s.records[0].units=Object.fromEntries(Object.entries(s.records[0].units).reverse());
  assert.equal(D.validateState(s,now).records.length,1);
 });
+test('historical review context selects the requested record and its preceding dose only',()=>{
+ let s=D.empty();
+ for(const r of [record({id:'first',observedAt:'2026-11-12T10:00:00Z',radiation:10}),record({id:'middle',observedAt:'2026-11-13T10:00:00Z',radiation:12,sleep:4}),record({id:'last',radiation:15})])s=D.upsert(s,r);
+ const context=D.reviewContext(s,'middle');assert.equal(context.record.id,'middle');assert.equal(context.previousDose.radiation,10);
+ assert.ok(D.evaluate(context.record,context.previousDose).some(f=>f.id==='sleep'));
+ assert.equal(D.reviewContext(s,null).record.id,'last');assert.equal(D.reviewContext(D.empty(),null).record,null);
+});
+test('dose corrections and imported preceding doses invalidate dependent radiation reviews',()=>{
+ let s=D.upsert(D.empty(),record({id:'first',observedAt:'2026-11-13T10:00:00Z',radiation:10}));s=D.upsert(s,record({id:'last',radiation:12}));
+ s.acknowledgements=[{recordId:'last',ruleId:'radiation',at:'2026-11-14T11:00:00Z'},{recordId:'last',ruleId:'heart',at:'2026-11-14T11:00:00Z'}];
+ const corrected=D.upsert(s,record({id:'first',observedAt:'2026-11-13T10:00:00Z',radiation:1}));
+ assert.ok(!corrected.acknowledgements.some(a=>a.ruleId==='radiation'));assert.ok(corrected.acknowledgements.some(a=>a.ruleId==='heart'));
+ const imported=D.upsert(D.empty(),record({id:'between',observedAt:'2026-11-14T09:00:00Z',radiation:11}));
+ assert.ok(!D.merge(s,imported,now).acknowledgements.some(a=>a.ruleId==='radiation'));
+});
+test('backup rejects acknowledgements preceding the referenced observation',()=>{
+ const s=D.upsert(D.empty(),record());s.acknowledgements=[{recordId:'a',ruleId:'sleep',at:'2026-11-01T00:00:00Z'}];
+ assert.throws(()=>D.validateState(s,now));
+});
