@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" translate="no">
 <head>
   <meta charset="UTF-8">
@@ -600,6 +600,38 @@
 
     document.addEventListener('click', function (e) {
       if (!e.target.closest('.heat-zone-div')) hideTooltip();
+    });
+      window.updateZoneStatus = function (zoneId, status, load, temp) {
+      var el = document.getElementById(zoneId);
+      if (!el) return;
+      var upper = (status || 'NOMINAL').toUpperCase();
+      el.setAttribute('data-status', upper);
+      if (load) el.setAttribute('data-load', load);
+      if (temp) el.setAttribute('data-temp', temp);
+
+      el.classList.remove('optimal', 'normal', 'status-nominal', 'zone-blue', 'zone-green',
+                          'elevated', 'strain', 'warning', 'status-elevated', 'status-warning', 'zone-yellow', 'zone-orange',
+                          'critical', 'alert', 'status-critical', 'zone-red');
+
+      if (upper === 'NOMINAL' || upper === 'OPTIMAL' || upper === 'NORMAL') {
+        el.classList.add('status-nominal', 'optimal');
+      } else if (upper === 'ELEVATED' || upper === 'STRAIN' || upper === 'WARNING') {
+        el.classList.add('status-warning', 'warning');
+      } else if (upper === 'CRITICAL' || upper === 'ALERT') {
+        el.classList.add('status-critical', 'critical');
+      }
+    };
+
+    // Initialize all zones with their starting state classes based on data-status
+    document.querySelectorAll('.heat-zone-div').forEach(function (zone) {
+      var st = (zone.getAttribute('data-status') || 'NOMINAL').toUpperCase();
+      if (st === 'NOMINAL' || st === 'OPTIMAL') {
+        zone.classList.add('status-nominal', 'optimal');
+      } else if (st === 'ELEVATED' || st === 'STRAIN' || st === 'WARNING') {
+        zone.classList.add('status-warning', 'warning');
+      } else if (st === 'CRITICAL' || st === 'ALERT') {
+        zone.classList.add('status-critical', 'critical');
+      }
     });
   })();
   </script>

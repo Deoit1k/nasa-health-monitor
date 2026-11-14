@@ -264,7 +264,7 @@ function initSilhouetteInteraction() {
   const tooltipStatus = document.getElementById('tooltip-zone-status');
 
   // Select all interactive heat zones (both mandatory core zones and expanded limbs/hips/legs)
-  const zones = Array.from(document.querySelectorAll('.heat-zone'));
+  const zones = Array.from(document.querySelectorAll('.heat-zone, .heat-zone-div'));
 
   function updateTooltipContent(zone) {
     const name = zone.getAttribute('data-zone-name') || 'BIOMETRIC ZONE';
@@ -341,7 +341,7 @@ function initSilhouetteInteraction() {
 
   // Tap or click outside to dismiss tooltip on mobile or desktop
   document.addEventListener('pointerdown', (e) => {
-    if (!e.target.closest('.heat-zone') && !e.target.closest('#silhouette-tooltip')) {
+    if (!e.target.closest('.heat-zone, .heat-zone-div') && !e.target.closest('#silhouette-tooltip')) {
       if (tooltip) {
         tooltip.style.display = 'none';
       }
@@ -474,3 +474,32 @@ function initSimulationControls() {
     });
   }
 }
+
+/**
+ * Dynamically update biometric zone status, load, and temperature
+ * @param {string} zoneId - ID of the zone element (e.g. 'zone-head')
+ * @param {string} status - 'NOMINAL', 'OPTIMAL', 'ELEVATED', 'WARNING', 'CRITICAL', etc.
+ * @param {string} [load] - Load percentage (e.g. '45%')
+ * @param {string} [temp] - Temperature (e.g. '37.2 °C')
+ */
+window.updateZoneStatus = function(zoneId, status, load, temp) {
+  const el = document.getElementById(zoneId);
+  if (!el) return;
+  const upper = (status || 'NOMINAL').toUpperCase();
+  el.setAttribute('data-status', upper);
+  if (load) el.setAttribute('data-load', load);
+  if (temp) el.setAttribute('data-temp', temp);
+
+  // Sync state classes cleanly
+  el.classList.remove('optimal', 'normal', 'status-nominal', 'zone-blue', 'zone-green',
+                      'elevated', 'strain', 'warning', 'status-elevated', 'status-warning', 'zone-yellow', 'zone-orange',
+                      'critical', 'alert', 'status-critical', 'zone-red');
+
+  if (upper === 'NOMINAL' || upper === 'OPTIMAL' || upper === 'NORMAL') {
+    el.classList.add('status-nominal', 'optimal');
+  } else if (upper === 'ELEVATED' || upper === 'STRAIN' || upper === 'WARNING') {
+    el.classList.add('status-warning', 'warning');
+  } else if (upper === 'CRITICAL' || upper === 'ALERT') {
+    el.classList.add('status-critical', 'critical');
+  }
+};
