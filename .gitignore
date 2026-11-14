@@ -1,0 +1,14 @@
+# Environment and local agent folders
+.agent/
+.gemini/
+.codex/
+.vscode/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs and temp files
+*.log
+*.tmp

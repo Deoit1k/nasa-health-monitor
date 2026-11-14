@@ -1,0 +1,349 @@
+/**
+ * NASA BIOMEDICAL TELEMETRY CORE
+ * Layout & Grid Architecture
+ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-space);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.45;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Space Background & Grid Pattern */
+body {
+  background-color: var(--bg-space);
+  background-image: 
+    radial-gradient(circle at 50% 15%, rgba(0, 229, 255, 0.06) 0%, transparent 60%),
+    radial-gradient(circle at 85% 80%, rgba(255, 42, 85, 0.04) 0%, transparent 45%),
+    linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  background-attachment: fixed;
+}
+
+/* Subtle HUD Scanline Overlay */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.12) 0px,
+    rgba(0, 0, 0, 0.12) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  z-index: 999;
+  opacity: 0.7;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-space);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-active);
+  border-radius: var(--radius-sm);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-cyan);
+}
+
+/* Master Dashboard Container */
+.hud-wrapper {
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 18px 24px 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  z-index: 10;
+}
+
+/* HUD Top Header */
+.hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 22px;
+  background: var(--bg-surface-translucent);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--neon-cyan);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glow-subtle);
+}
+
+.hud-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nasa-logo-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border: 1px solid var(--neon-cyan);
+  background: rgba(0, 229, 255, 0.12);
+  color: var(--neon-cyan);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--glow-subtle);
+}
+
+.hud-header-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.hud-header-title h1 {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--text-highlight);
+  text-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+}
+
+.hud-header-subtitle {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 1.5px;
+  color: var(--text-secondary);
+}
+
+.hud-header-telemetry-meta {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.meta-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.meta-value {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 1px;
+}
+
+.status-pill-nominal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  background: var(--status-nominal-dim);
+  border: 1px solid var(--status-nominal);
+  color: var(--status-nominal);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 20px;
+  letter-spacing: 1px;
+}
+
+.status-pill-nominal::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background-color: var(--status-nominal);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--status-nominal);
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.8); }
+}
+
+/* Top Vitals Bar (4 Metric Cards) */
+.hud-vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* Main Two-Column Row */
+.hud-main-grid {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+/* Bottom Split Row: Simulation & Protocols */
+.hud-bottom-grid {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 20px;
+}
+
+/* Standard HUD Panel Frame */
+.hud-panel {
+  background: var(--bg-surface-translucent);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+/* Futuristic HUD Corner Cut / Accent Brackets */
+.hud-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border-top: 2px solid var(--neon-cyan);
+  border-left: 2px solid var(--neon-cyan);
+  pointer-events: none;
+}
+
+.hud-panel::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  border-bottom: 2px solid var(--neon-cyan);
+  border-right: 2px solid var(--neon-cyan);
+  pointer-events: none;
+}
+
+.hud-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(0, 229, 255, 0.03);
+}
+
+.hud-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--text-highlight);
+  text-transform: uppercase;
+}
+
+.hud-panel-title .title-icon {
+  color: var(--neon-cyan);
+  font-size: 1rem;
+}
+
+.hud-panel-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.hud-panel-body {
+  padding: 18px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Charts Column Layout */
+.charts-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.chart-card {
+  min-height: 250px;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 1280px) {
+  .hud-main-grid {
+    grid-template-columns: 400px 1fr;
+  }
+  .hud-bottom-grid {
+    grid-template-columns: 400px 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .hud-vitals-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .hud-main-grid {
+    grid-template-columns: 1fr;
+  }
+  .hud-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .hud-wrapper {
+    padding: 12px;
+  }
+  .hud-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .hud-header-telemetry-meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .hud-vitals-grid {
+    grid-template-columns: 1fr;
+  }
+}
