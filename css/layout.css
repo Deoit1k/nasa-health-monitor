@@ -79,6 +79,8 @@ body::before {
   gap: 20px;
   position: relative;
   z-index: 10;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 /* HUD Top Header */
@@ -204,11 +206,15 @@ body::before {
 }
 
 /* Main Two-Column Row */
+main.hud-main-grid,
 .hud-main-grid {
   display: grid;
   grid-template-columns: 460px 1fr;
   gap: 20px;
   align-items: stretch;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Bottom Split Row: Simulation & Protocols */
@@ -330,20 +336,115 @@ body::before {
   }
 }
 
-@media (max-width: 640px) {
+/* Mobile Screens (max-width: 768px) */
+@media (max-width: 768px) {
   .hud-wrapper {
-    padding: 12px;
+    padding: 12px 10px 24px 10px;
+    gap: 16px;
+    overflow-x: hidden;
   }
+
+  main.hud-main-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    overflow-x: hidden;
+  }
+
+  .hud-bottom-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .hud-vitals-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* Header adjustments for mobile */
   .hud-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 14px;
+    padding: 14px 16px;
+    max-width: 100%;
+    overflow: hidden;
   }
+
+  .hud-header-brand {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .hud-header-title {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .hud-header-title h1 {
+    font-size: clamp(1.1rem, 5vw, 1.5rem);
+    letter-spacing: 1.5px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    line-height: 1.25;
+  }
+
+  .hud-header-subtitle {
+    font-size: 0.68rem;
+    letter-spacing: 1px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    line-height: 1.35;
+    margin-top: 4px;
+  }
+
+  /* Metadata in 1 column or flex-wrap stack */
   .hud-header-telemetry-meta {
     width: 100%;
-    justify-content: space-between;
-  }
-  .hud-vitals-grid {
+    display: grid;
     grid-template-columns: 1fr;
+    gap: 10px;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 12px;
+  }
+
+  .hud-header-telemetry-meta .meta-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .meta-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.8px;
+  }
+
+  .meta-value {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hud-wrapper {
+    padding: 8px 8px 20px 8px;
+    gap: 12px;
+  }
+
+  .hud-panel-header {
+    padding: 10px 12px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .hud-panel-body {
+    padding: 12px 10px;
   }
 }

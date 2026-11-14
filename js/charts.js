@@ -232,7 +232,8 @@ function initHydrationChart() {
 }
 
 /**
- * Interactive SVG Silhouette & Floating Tooltip (Strictly Left of Cursor)
+ * Interactive SVG Silhouette & Floating Tooltip
+ * Supports both Desktop Hover and Mobile Touchscreen Tap
  */
 function initSilhouetteInteraction() {
   const tooltip = document.getElementById('silhouette-tooltip');
@@ -248,71 +249,149 @@ function initSilhouetteInteraction() {
 
   const zones = [zoneHead, zoneChest, zoneAbdomen, zoneKnees].filter(Boolean);
 
-  zones.forEach(zone => {
-    zone.addEventListener('mouseenter', (e) => {
-      const name = zone.getAttribute('data-zone-name') || 'BIOMETRIC ZONE';
-      const load = zone.getAttribute('data-load') || '0%';
-      const temp = zone.getAttribute('data-temp') || '36.6 °C';
-      const status = zone.getAttribute('data-status') || 'NOMINAL';
+  function updateTooltipContent(zone) {
+    const name = zone.getAttribute('data-zone-name') || 'BIOMETRIC ZONE';
+    const load = zone.getAttribute('data-load') || '0%';
+    const temp = zone.getAttribute('data-temp') || '36.6 °C';
+    const status = zone.getAttribute('data-status') || 'NOMINAL';
 
-      if (tooltipTitle) tooltipTitle.textContent = name;
-      if (tooltipLoad) tooltipLoad.textContent = load;
-      if (tooltipTemp) tooltipTemp.textContent = temp;
-      if (tooltipStatus) {
-        tooltipStatus.textContent = status;
-        tooltipStatus.className = 'tooltip-badge';
-        if (status === 'NOMINAL') tooltipStatus.classList.add('status-nominal');
-        else if (status === 'ELEVATED') tooltipStatus.classList.add('status-elevated');
-        else if (status === 'WARNING') tooltipStatus.classList.add('status-warning');
-        else if (status === 'CRITICAL') tooltipStatus.classList.add('status-critical');
-        else tooltipStatus.classList.add('status-nominal');
-      }
+    if (tooltipTitle) tooltipTitle.textContent = name;
+    if (tooltipLoad) tooltipLoad.textContent = load;
+    if (tooltipTemp) tooltipTemp.textContent = temp;
+    if (tooltipStatus) {
+      tooltipStatus.textContent = status;
+      tooltipStatus.className = 'tooltip-badge';
+      if (status === 'NOMINAL') tooltipStatus.classList.add('status-nominal');
+      else if (status === 'ELEVATED') tooltipStatus.classList.add('status-elevated');
+      else if (status === 'WARNING') tooltipStatus.classList.add('status-warning');
+      else if (status === 'CRITICAL') tooltipStatus.classList.add('status-critical');
+      else tooltipStatus.classList.add('status-nominal');
+    }
+  }
 
+  function showAndPosition(zone, clientX, clientY) {
+    updateTooltipContent(zone);
+    if (tooltip) {
       tooltip.style.display = 'flex';
-      positionTooltipLeft(e, tooltip);
+      positionTooltip(clientX, clientY, tooltip, zone);
+    }
+  }
+
+  zones.forEach(zone => {
+    // Desktop Hover Events
+    zone.addEventListener('mouseenter', (e) => {
+      showAndPosition(zone, e.clientX, e.clientY);
     });
 
     zone.addEventListener('mousemove', (e) => {
-      positionTooltipLeft(e, tooltip);
+      if (tooltip && tooltip.style.display === 'flex') {
+        positionTooltip(e.clientX, e.clientY, tooltip, zone);
+      }
     });
 
     zone.addEventListener('mouseleave', () => {
-      if (tooltip) tooltip.style.display = 'none';
+      // On mouse leave, hide tooltip when hover is supported
+      if (window.matchMedia('(hover: hover)').matches) {
+        if (tooltip) tooltip.style.display = 'none';
+        zone.classList.remove('is-active');
+      }
     });
+
+    // Mobile / Touchscreen Click & Tap Events
+    zone.addEventListener('click', (e) => {
+      e.stopPropagation();
+      zones.forEach(z => z.classList.remove('is-active'));
+      zone.classList.add('is-active');
+
+      const rect = zone.getBoundingClientRect();
+      const x = (e.clientX && e.clientX > 0) ? e.clientX : (rect.left + rect.width / 2);
+      const y = (e.clientY && e.clientY > 0) ? e.clientY : (rect.top + rect.height / 2);
+
+      showAndPosition(zone, x, y);
+    });
+
+    // Keyboard accessibility (Enter / Space)
+    zone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        zones.forEach(z => z.classList.remove('is-active'));
+        zone.classList.add('is-active');
+        const rect = zone.getBoundingClientRect();
+        showAndPosition(zone, rect.left + rect.width / 2, rect.top + rect.height / 2);
+      }
+    });
+  });
+
+  // Tap or click outside to dismiss tooltip on mobile or desktop
+  document.addEventListener('pointerdown', (e) => {
+    if (!e.target.closest('.heat-zone') && !e.target.closest('#silhouette-tooltip')) {
+      if (tooltip) {
+        tooltip.style.display = 'none';
+      }
+      zones.forEach(z => z.classList.remove('is-active'));
+    }
   });
 }
 
 /**
- * Position tooltip strictly to the LEFT of the mouse cursor
+ * Position tooltip strictly within screen boundaries
+ * Desktop: strictly to the left of the cursor
+ * Mobile (<= 768px): to the left if space permits, clamped safely between 10px and screen width so it never overflows
  */
-function positionTooltipLeft(e, tooltip) {
+function positionTooltip(clientX, clientY, tooltip, zone) {
   if (!tooltip) return;
 
   const offset = 18;
   const tooltipWidth = tooltip.offsetWidth || 230;
   const tooltipHeight = tooltip.offsetHeight || 130;
+  const halfHeight = tooltipHeight / 2;
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
 
-  // Calculate position strictly to the left of cursor
-  let leftPos = e.clientX - tooltipWidth - offset;
-  let topPos = e.clientY;
+  const maxLeft = Math.max(10, screenWidth - tooltipWidth - 10);
+  let leftPos = clientX - tooltipWidth - offset;
+  let topPos = clientY;
 
-  // Viewport bounds protection
-  if (leftPos < 10) {
-    // If overflowing left edge of screen, keep within margin
-    leftPos = 10;
+  if (screenWidth <= 768) {
+    // If placing to the left overflows the screen left boundary on mobile
+    if (leftPos < 10) {
+      if (zone) {
+        const rect = zone.getBoundingClientRect();
+        const rightPos = rect.right + offset;
+        if (rightPos + tooltipWidth <= screenWidth - 10) {
+          leftPos = rightPos;
+        } else {
+          // Center within viewport bounds with safe margins
+          leftPos = Math.max(10, Math.min(maxLeft, (screenWidth - tooltipWidth) / 2));
+        }
+      } else {
+        leftPos = Math.max(10, Math.min(maxLeft, (screenWidth - tooltipWidth) / 2));
+      }
+    }
+  } else {
+    // Desktop: strictly to the left of cursor, protected by left edge
+    if (leftPos < 10) {
+      leftPos = 10;
+    }
   }
+
+  // Ensure left position is strictly clamped inside [10, maxLeft]
+  if (leftPos < 10) leftPos = 10;
+  if (leftPos > maxLeft) leftPos = maxLeft;
 
   // Vertical viewport clamping
-  const halfHeight = tooltipHeight / 2;
   if (topPos - halfHeight < 10) {
     topPos = halfHeight + 10;
-  } else if (topPos + halfHeight > window.innerHeight - 10) {
-    topPos = window.innerHeight - halfHeight - 10;
+  } else if (topPos + halfHeight > screenHeight - 10) {
+    topPos = screenHeight - halfHeight - 10;
   }
 
-  tooltip.style.left = `${leftPos}px`;
-  tooltip.style.top = `${topPos}px`;
+  tooltip.style.left = `${Math.round(leftPos)}px`;
+  tooltip.style.top = `${Math.round(topPos)}px`;
 }
+
+// Backward-compatibility alias
+const positionTooltipLeft = positionTooltip;
 
 /**
  * Simulation Controls UI Listeners & Presets
