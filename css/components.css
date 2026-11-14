@@ -867,22 +867,17 @@
   width: 100%;
   max-width: 320px;
   line-height: 0;          /* collapse inline-block gap */
+  background: transparent; /* no dark bounding box */
 }
 
-/* The 3D render image styled as a neon-blue hologram */
+/* The 3D render image styled as a bright cyan/blue NASA HUD hologram */
+#body-3d-render,
 .body-3d-render {
   display: block;
   width: 100%;
   height: auto;
   border-radius: var(--radius-sm);
-  /* Holographic colour shift: inverts whites→dark, then cyan-tints */
-  filter:
-    invert(1)
-    hue-rotate(180deg)
-    brightness(0.95)
-    contrast(1.2)
-    sepia(0.3)
-    saturate(2.5);
+  filter: invert(1) sepia(1) saturate(5) hue-rotate(175deg) brightness(1.05) contrast(1.35);
   mix-blend-mode: screen;
   user-select: none;
   pointer-events: none;
@@ -900,13 +895,16 @@
 
 
 /* ==========================================================================
-   10. Div-based Heat-Zone Overlays (replace SVG <g> zones)
+   10. Div-based Heat-Zone Overlays (Anatomical Body Glow & Dot Markers)
    ========================================================================== */
 
-/* Base zone — absolutely positioned relative to .body-3d-stage */
+/* Base zone — absolutely positioned relative to .body-3d-stage center anchor */
 .heat-zone-div {
   position: absolute;
-  border-radius: 50%;           /* soft oval glow patch */
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -914,101 +912,124 @@
   outline: none;
   transition: all 0.22s ease-in-out;
   z-index: 20;
-  /* radial-gradient "heat spot" base — overridden per colour variant */
-  background: radial-gradient(ellipse at center,
-    rgba(56, 189, 248, 0.22) 0%,
-    rgba(56, 189, 248, 0.08) 50%,
-    transparent 75%);
+  mix-blend-mode: color; /* colors only body surface without glowing empty dark background */
 }
 
 /* Hover / focus glow intensification */
 .heat-zone-div:hover,
 .heat-zone-div:focus {
-  background: radial-gradient(ellipse at center,
-    rgba(56, 189, 248, 0.45) 0%,
-    rgba(56, 189, 248, 0.20) 50%,
-    transparent 75%);
-  filter: drop-shadow(0 0 10px currentColor);
+  filter: drop-shadow(0 0 8px currentColor);
 }
 
-/* Pulsing dot-marker in the centre of each zone */
+/* Pulsing dot-marker in the center of each zone (crisp white core + neon ring) */
 .zone-dot-marker {
   display: block;
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: currentColor;
-  opacity: 0.9;
+  background: #ffffff; /* bright crisp white core */
+  box-shadow: 0 0 0 1.5px currentColor, 0 0 6px currentColor; /* thin neon ring */
   animation: zone-dot-pulse 2.8s ease-in-out infinite;
   flex-shrink: 0;
 }
 
 @keyframes zone-dot-pulse {
-  0%, 100% { transform: scale(1);    opacity: 0.9; }
-  50%       { transform: scale(1.35); opacity: 0.45; }
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 1.5px currentColor, 0 0 6px currentColor;
+  }
+  50% {
+    transform: scale(1.35);
+    box-shadow: 0 0 0 2px currentColor, 0 0 10px currentColor;
+  }
 }
 
-/* ── Colour variants ────────────────────────────────────────────────────── */
+/* Dual knee marker support */
+.zone-knees-wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+/* ── Compact Radial Gradient Colour variants (2x smaller, body tint only) ── */
 /* Blue — NOMINAL / cranial, neck, elbows */
 .zone-blue {
   color: var(--accent-blue);
-  background: radial-gradient(ellipse at center,
-    rgba(56, 189, 248, 0.26) 0%,
-    rgba(56, 189, 248, 0.10) 55%,
-    transparent 80%);
+  background: radial-gradient(circle at center,
+    rgba(56, 189, 248, 0.45) 0%,
+    rgba(56, 189, 248, 0.20) 40%,
+    transparent 70%);
 }
 .zone-blue:hover,
 .zone-blue:focus {
-  background: radial-gradient(ellipse at center,
-    rgba(56, 189, 248, 0.52) 0%,
-    rgba(56, 189, 248, 0.22) 55%,
-    transparent 80%);
+  background: radial-gradient(circle at center,
+    rgba(56, 189, 248, 0.70) 0%,
+    rgba(56, 189, 248, 0.35) 45%,
+    transparent 70%);
 }
 
 /* Green — NOMINAL / chest, arms, hips-left, legs-left */
 .zone-green {
   color: var(--status-nominal);
-  background: radial-gradient(ellipse at center,
-    rgba(52, 211, 153, 0.26) 0%,
-    rgba(52, 211, 153, 0.10) 55%,
-    transparent 80%);
+  background: radial-gradient(circle at center,
+    rgba(52, 211, 153, 0.45) 0%,
+    rgba(52, 211, 153, 0.20) 40%,
+    transparent 70%);
 }
 .zone-green:hover,
 .zone-green:focus {
-  background: radial-gradient(ellipse at center,
-    rgba(52, 211, 153, 0.52) 0%,
-    rgba(52, 211, 153, 0.22) 55%,
-    transparent 80%);
+  background: radial-gradient(circle at center,
+    rgba(52, 211, 153, 0.70) 0%,
+    rgba(52, 211, 153, 0.35) 45%,
+    transparent 70%);
 }
 
 /* Yellow — ELEVATED / abdomen, hips-right, legs-right */
 .zone-yellow {
   color: var(--status-elevated);
-  background: radial-gradient(ellipse at center,
-    rgba(251, 191, 36, 0.26) 0%,
-    rgba(251, 191, 36, 0.10) 55%,
-    transparent 80%);
+  background: radial-gradient(circle at center,
+    rgba(251, 191, 36, 0.45) 0%,
+    rgba(251, 191, 36, 0.20) 40%,
+    transparent 70%);
 }
 .zone-yellow:hover,
 .zone-yellow:focus {
-  background: radial-gradient(ellipse at center,
-    rgba(251, 191, 36, 0.52) 0%,
-    rgba(251, 191, 36, 0.22) 55%,
-    transparent 80%);
+  background: radial-gradient(circle at center,
+    rgba(251, 191, 36, 0.70) 0%,
+    rgba(251, 191, 36, 0.35) 45%,
+    transparent 70%);
 }
 
 /* Orange — WARNING / knees */
 .zone-orange {
   color: var(--status-warning);
-  background: radial-gradient(ellipse at center,
-    rgba(251, 146, 60, 0.30) 0%,
-    rgba(251, 146, 60, 0.12) 55%,
-    transparent 80%);
+  background: radial-gradient(circle at center,
+    rgba(251, 146, 60, 0.50) 0%,
+    rgba(251, 146, 60, 0.22) 40%,
+    transparent 70%);
 }
 .zone-orange:hover,
 .zone-orange:focus {
-  background: radial-gradient(ellipse at center,
-    rgba(251, 146, 60, 0.56) 0%,
-    rgba(251, 146, 60, 0.24) 55%,
-    transparent 80%);
+  background: radial-gradient(circle at center,
+    rgba(251, 146, 60, 0.75) 0%,
+    rgba(251, 146, 60, 0.40) 45%,
+    transparent 70%);
 }
+
+/* ── Base MALE anatomical positioning (CSS defaults) ─────────────────────── */
+#zone-head          { top: 13%;   left: 50%; }
+#zone-neck          { top: 21.5%; left: 50%; }
+#zone-chest         { top: 30%;   left: 50%; }
+#zone-abdomen       { top: 43%;   left: 50%; }
+#zone-elbows-left   { top: 38.5%; left: 27.5%; }
+#zone-elbows-right  { top: 38.5%; left: 72.5%; }
+#zone-arms-left     { top: 47%;   left: 21.5%; }
+#zone-arms-right    { top: 47%;   left: 78.5%; }
+#zone-hips-left     { top: 57%;   left: 41.5%; }
+#zone-hips-right    { top: 57%;   left: 58.5%; }
+#zone-knees         { top: 70%;   left: 50%; width: 62px; height: 38px; }
+#zone-legs-left     { top: 82%;   left: 42%; }
+#zone-legs-right    { top: 82%;   left: 58%; }
