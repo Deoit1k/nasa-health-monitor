@@ -55,18 +55,18 @@ function initRadiationChart() {
       labels: labels,
       datasets: [
         {
-          label: 'Accumulated radiation (mSv)',
+          label: 'Radiation sensor dose (mSv)',
           data: data,
           borderColor: '#f87171',
           borderWidth: 2,
           backgroundColor: gradient,
           fill: true,
-          tension: 0.35,
+          tension: 0.4,
           pointBackgroundColor: '#f87171',
           pointBorderColor: '#ffffff',
           pointBorderWidth: 1.5,
-          pointRadius: 4,
-          pointHoverRadius: 6,
+          pointRadius: 2,
+          pointHoverRadius: 4,
           pointHoverBackgroundColor: '#ffffff',
           pointHoverBorderColor: '#f87171',
         }
@@ -104,6 +104,8 @@ function initRadiationChart() {
           },
           ticks: {
             color: '#94a3b8',
+            maxTicksLimit: 6,
+            maxRotation: 0,
             font: {
               family: "'JetBrains Mono', monospace",
               size: 11,
@@ -164,12 +166,12 @@ function initHydrationChart() {
           borderWidth: 2,
           backgroundColor: gradientSky,
           fill: true,
-          tension: 0.35,
+          tension: 0.4,
           pointBackgroundColor: '#38bdf8',
           pointBorderColor: '#ffffff',
           pointBorderWidth: 1.5,
-          pointRadius: 4,
-          pointHoverRadius: 6,
+          pointRadius: 2,
+          pointHoverRadius: 4,
           pointHoverBackgroundColor: '#ffffff',
           pointHoverBorderColor: '#38bdf8',
         },
@@ -180,12 +182,12 @@ function initHydrationChart() {
           borderWidth: 1.8,
           borderDash: [4, 4],
           fill: false,
-          tension: 0.3,
+          tension: 0.4,
           pointBackgroundColor: '#818cf8',
           pointBorderColor: '#ffffff',
           pointBorderWidth: 1,
-          pointRadius: 3,
-          pointHoverRadius: 5
+          pointRadius: 2,
+          pointHoverRadius: 4
         }
       ]
     },
@@ -220,6 +222,8 @@ function initHydrationChart() {
           },
           ticks: {
             color: '#94a3b8',
+            maxTicksLimit: 6,
+            maxRotation: 0,
             font: {
               family: "'JetBrains Mono', monospace",
               size: 11,
@@ -423,22 +427,43 @@ const positionTooltipLeft = positionTooltip;
 /**
  * Consume bounded telemetry history; keep chart styling and input handling separate.
  */
+function appendChartSample(chart, sample, values, history, reset) {
+  if (reset) {
+    chart.data.labels.length = 0;
+    chart.data.datasets.forEach(dataset => { dataset.data.length = 0; });
+  }
+  chart.data.labels.push('T-0s');
+  chart.data.datasets.forEach((dataset, index) => dataset.data.push(values[index]));
+  while (chart.data.labels.length > 15) {
+    chart.data.labels.shift();
+    chart.data.datasets.forEach(dataset => dataset.data.shift());
+  }
+  const visibleSamples = history.slice(-chart.data.labels.length);
+  visibleSamples.forEach((point, index) => {
+    chart.data.labels[index] = `T-${Math.round(sample.elapsedSeconds - point.elapsedSeconds)}s`;
+  });
+}
+
 document.addEventListener('telemetry:update', event => {
-  const { history } = event.detail;
-  const labels = history.map(sample => `D${sample.missionDays.toFixed(5)}`);
+  const { history, state, reason } = event.detail;
+  const sample = history[history.length - 1];
+  if (!sample) return;
+  const reset = reason !== 'tick';
   if (radiationChartInstance) {
     const chart = radiationChartInstance;
-    chart.data.labels = labels;
-    chart.data.datasets[0].data = history.map(sample => sample.radiation);
-    // Never clip a high-dose preset against the mockup's original 0.8 mSv ceiling.
-    chart.options.scales.y.max = Math.max(1, ...chart.data.datasets[0].data) * 1.1;
+    appendChartSample(chart, sample, [sample.radiation], history, reset);
+    // Focus on the current dose so sub-percent sensor drift remains visible.
+    const padding = Math.max(0.01, state.radiation * 0.015);
+    chart.options.scales.y.min = Math.max(0, Math.min(state.radiation - padding, ...chart.data.datasets[0].data));
+    chart.options.scales.y.max = Math.max(state.radiation + padding, ...chart.data.datasets[0].data);
     chart.update('none');
   }
   if (hydrationChartInstance) {
     const chart = hydrationChartInstance;
-    chart.data.labels = labels.slice();
-    chart.data.datasets[0].data = history.map(sample => sample.hydration);
-    chart.data.datasets[1].data = history.map(sample => sample.metabolism);
+    appendChartSample(chart, sample, [sample.hydration, sample.metabolism], history, reset);
+    const values = chart.data.datasets.flatMap(dataset => dataset.data);
+    chart.options.scales.y.min = Math.max(0, Math.floor((Math.min(...values) - 5) / 10) * 10);
+    chart.options.scales.y.max = Math.min(100, Math.ceil((Math.max(...values) + 5) / 10) * 10);
     chart.update('none');
   }
 });

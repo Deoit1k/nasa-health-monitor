@@ -118,7 +118,7 @@ function boot({ charts = true, missing = [] } = {}) {
       this.updates = 0;
       instances.push(this);
     }
-    update() { this.updates++; }
+    update(mode) { this.updates++; this.lastUpdateMode = mode; }
   }
   const context = vm.createContext({ document, window, console, Date: Clock,
     Event: class { constructor(type) { this.type = type; } },

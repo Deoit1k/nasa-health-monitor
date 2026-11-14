@@ -8,7 +8,7 @@ test('loaded script order binds cards and both charts to the same initial snapsh
   const app = boot();
   const state = app.window.NasaTelemetry.getState();
   assert.equal(app.elements.get('val-radiation').textContent, state.radiation.toFixed(3));
-  assert.equal(app.instances[0].data.datasets[0].data.at(-1), state.radiation);
+  assert.equal(app.instances[0].data.datasets[0].data.at(-1), state.radiationReading);
   assert.equal(app.instances[1].data.datasets[0].data.at(-1), state.hydration);
   assert.equal(app.instances[1].data.datasets[1].data.at(-1), state.metabolism);
   assert.equal(app.instances[0].data.datasets[0].borderColor, '#f87171');
@@ -40,13 +40,29 @@ test('presets publish one atomic snapshot and manual controls rebase chart histo
 
 test('stream history is bounded, synchronized and lifecycle restart keeps one timer', () => {
   const app = boot();
+  let latestHistory;
+  app.document.addEventListener('telemetry:update', event => { latestHistory = event.detail.history; });
+  const arrays = app.instances.map(chart => [chart.data.labels, ...chart.data.datasets.map(dataset => dataset.data)]);
   for (let i = 0; i < 100; i++) app.tick();
-  for (const chart of app.instances) {
-    assert.equal(chart.data.labels.length, 60);
-    for (const dataset of chart.data.datasets) assert.equal(dataset.data.length, 60);
+  assert.equal(latestHistory.length, 15);
+  for (const [index, chart] of app.instances.entries()) {
+    assert.equal(chart.data.labels.length, 15);
+    assert.equal(chart.data.labels, arrays[index][0], 'append and shift existing arrays');
+    assert.equal(chart.lastUpdateMode, 'none');
+    assert.ok(chart.options.scales.x.ticks.maxTicksLimit <= 6);
+    assert.ok(chart.data.labels.every(label => /^T-\d+s$/.test(label)));
+    assert.equal(chart.data.labels[0], 'T-14s');
+    assert.equal(chart.data.labels.at(-1), 'T-0s');
+    for (const [datasetIndex, dataset] of chart.data.datasets.entries()) {
+      assert.equal(dataset.data.length, 15);
+      assert.equal(dataset.data, arrays[index][datasetIndex + 1]);
+      assert.equal(dataset.pointRadius, 2);
+      assert.equal(dataset.pointHoverRadius, 4);
+      assert.equal(dataset.tension, 0.4);
+      assert.ok(Math.max(...dataset.data) - Math.min(...dataset.data) > 0.1, 'visible live variation');
+    }
   }
-  const dose = app.instances[0].data.datasets[0].data;
-  assert.ok(dose.every((value, index) => index === 0 || value >= dose[index - 1]));
+  assert.equal(latestHistory[0].elapsedSeconds, 86, 'oldest telemetry samples were discarded');
   app.window.NasaTelemetry.init();
   assert.equal(app.timers.size, 1);
   app.window.dispatchEvent({ type: 'pagehide' });
@@ -55,6 +71,23 @@ test('stream history is bounded, synchronized and lifecycle restart keeps one ti
   app.window.dispatchEvent({ type: 'pageshow' });
   app.window.dispatchEvent({ type: 'pageshow' });
   assert.equal(app.timers.size, 1);
+});
+
+test('relative time labels respect delayed ticks and a preset clears existing chart arrays', () => {
+  const app = boot();
+  app.tick(2);
+  app.tick(10);
+  assert.deepEqual(Array.from(app.instances[0].data.labels), ['T-12s', 'T-10s', 'T-0s']);
+  const labels = app.instances[0].data.labels;
+  app.change('sim-preset-select', 'eva-high', 'change');
+  assert.equal(app.instances[0].data.labels, labels);
+  assert.deepEqual(Array.from(labels), ['T-0s']);
+  for (let i = 0; i < 20; i++) app.tick();
+  for (const chart of app.instances) {
+    for (const dataset of chart.data.datasets) {
+      assert.ok(dataset.data.every(value => value >= chart.options.scales.y.min && value <= chart.options.scales.y.max));
+    }
+  }
 });
 
 test('every zone supports hover, tap, keyboard and live tooltip updates', () => {
