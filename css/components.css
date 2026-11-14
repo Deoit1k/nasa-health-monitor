@@ -288,58 +288,94 @@
   stroke-width: 1.4;
 }
 
-/* Individual zone color presets */
-#zone-head .zone-glow-shape {
-  fill: rgba(56, 189, 248, 0.16);
+/* Individual zone color presets (Mandatory & Extended) */
+#zone-head .zone-glow-shape,
+#zone-arms-left .zone-glow-shape,
+#zone-arms-right .zone-glow-shape {
+  fill: rgba(56, 189, 248, 0.14);
   stroke: var(--accent-blue);
+  color: var(--accent-blue);
 }
 
-#zone-chest .zone-glow-shape {
-  fill: rgba(52, 211, 153, 0.16);
+#zone-chest .zone-glow-shape,
+#zone-hips-left .zone-glow-shape,
+#zone-legs-left .zone-glow-shape {
+  fill: rgba(52, 211, 153, 0.14);
   stroke: var(--status-nominal);
+  color: var(--status-nominal);
 }
 
-#zone-abdomen .zone-glow-shape {
-  fill: rgba(251, 191, 36, 0.16);
+#zone-abdomen .zone-glow-shape,
+#zone-hips-right .zone-glow-shape,
+#zone-legs-right .zone-glow-shape {
+  fill: rgba(251, 191, 36, 0.14);
   stroke: var(--status-elevated);
+  color: var(--status-elevated);
 }
 
 #zone-knees .zone-glow-shape {
-  fill: rgba(251, 146, 60, 0.16);
+  fill: rgba(251, 146, 60, 0.14);
   stroke: var(--status-warning);
+  color: var(--status-warning);
 }
 
 /* Zone Hover and Active States */
 .heat-zone:hover .zone-glow-shape,
 .heat-zone.is-active .zone-glow-shape,
 .heat-zone:focus .zone-glow-shape {
-  fill-opacity: 0.45;
-  stroke-width: 2;
+  fill-opacity: 0.42;
+  stroke: #ffffff;
+  stroke-width: 1.8;
   filter: drop-shadow(0 0 10px currentColor);
 }
 
 #zone-head:hover .zone-glow-shape,
-#zone-head.is-active .zone-glow-shape {
-  fill: rgba(56, 189, 248, 0.40);
+#zone-head.is-active .zone-glow-shape,
+#zone-arms-left:hover .zone-glow-shape,
+#zone-arms-left.is-active .zone-glow-shape,
+#zone-arms-right:hover .zone-glow-shape,
+#zone-arms-right.is-active .zone-glow-shape {
+  fill: rgba(56, 189, 248, 0.38);
   stroke: #ffffff;
 }
 
 #zone-chest:hover .zone-glow-shape,
-#zone-chest.is-active .zone-glow-shape {
-  fill: rgba(52, 211, 153, 0.40);
+#zone-chest.is-active .zone-glow-shape,
+#zone-hips-left:hover .zone-glow-shape,
+#zone-hips-left.is-active .zone-glow-shape,
+#zone-legs-left:hover .zone-glow-shape,
+#zone-legs-left.is-active .zone-glow-shape {
+  fill: rgba(52, 211, 153, 0.38);
   stroke: #ffffff;
 }
 
 #zone-abdomen:hover .zone-glow-shape,
-#zone-abdomen.is-active .zone-glow-shape {
-  fill: rgba(251, 191, 36, 0.40);
+#zone-abdomen.is-active .zone-glow-shape,
+#zone-hips-right:hover .zone-glow-shape,
+#zone-hips-right.is-active .zone-glow-shape,
+#zone-legs-right:hover .zone-glow-shape,
+#zone-legs-right.is-active .zone-glow-shape {
+  fill: rgba(251, 191, 36, 0.38);
   stroke: #ffffff;
 }
 
 #zone-knees:hover .zone-glow-shape,
 #zone-knees.is-active .zone-glow-shape {
-  fill: rgba(251, 146, 60, 0.40);
+  fill: rgba(251, 146, 60, 0.38);
   stroke: #ffffff;
+}
+
+/* Volumetric 3D Shading Helpers */
+.hud-3d-pad {
+  fill: rgba(255, 255, 255, 0.03);
+  stroke: rgba(148, 163, 184, 0.16);
+  stroke-width: 0.7;
+}
+
+.hud-3d-highlight {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1;
 }
 
 /* Target Reticles / Crosshairs on Zones */

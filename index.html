@@ -168,94 +168,166 @@
             <div class="silhouette-radar-circle circle-2"></div>
             <div class="scanner-laser"></div>
 
-            <!-- SVG Human Silhouette with 4 Interactive Heat Zones -->
+            <!-- SVG Human Silhouette with 10 Interactive Heat Zones (3D HUD Anatomy Model) -->
             <div class="silhouette-svg-container">
               <svg id="biometric-silhouette" class="silhouette-svg" viewBox="0 0 260 450" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                  <!-- Holographic Depth Gradients -->
-                  <linearGradient id="body-depth-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.04" />
-                    <stop offset="40%" stop-color="#38bdf8" stop-opacity="0.02" />
-                    <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.00" />
+                  <!-- 3D Volumetric Lighting & Shading Gradients -->
+                  <radialGradient id="hud-head-vol-grad" cx="48%" cy="38%" r="60%">
+                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.22" />
+                    <stop offset="55%" stop-color="#161f30" stop-opacity="0.35" />
+                    <stop offset="100%" stop-color="#080c14" stop-opacity="0.75" />
+                  </radialGradient>
+
+                  <radialGradient id="hud-torso-vol-grad" cx="50%" cy="30%" r="65%">
+                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.18" />
+                    <stop offset="45%" stop-color="rgba(255, 255, 255, 0.04)" />
+                    <stop offset="85%" stop-color="#0f1623" stop-opacity="0.5" />
+                    <stop offset="100%" stop-color="#080c14" stop-opacity="0.8" />
+                  </radialGradient>
+
+                  <linearGradient id="hud-specular-sweep" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="rgba(255, 255, 255, 0)" />
+                    <stop offset="50%" stop-color="rgba(255, 255, 255, 0.08)" />
+                    <stop offset="100%" stop-color="rgba(255, 255, 255, 0)" />
                   </linearGradient>
 
-                  <!-- Fine Sci-Fi Mesh Pattern -->
-                  <pattern id="hud-mesh" width="16" height="16" patternUnits="userSpaceOnUse">
-                    <circle cx="2" cy="2" r="0.6" fill="rgba(148, 163, 184, 0.12)" />
+                  <!-- Fine Holographic Grid Pattern -->
+                  <pattern id="hud-3d-grid" width="12" height="12" patternUnits="userSpaceOnUse">
+                    <circle cx="1.5" cy="1.5" r="0.45" fill="rgba(148, 163, 184, 0.12)" />
                   </pattern>
 
-                  <!-- Soft Ambient Glow Filters -->
-                  <filter id="hud-glow-soft" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="2" result="blur" />
+                  <!-- Soft Volumetric Glow -->
+                  <filter id="hud-ambient-glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="2.5" result="blur" />
                     <feComposite in="SourceGraphic" in2="blur" operator="over" />
                   </filter>
                 </defs>
 
-                <!-- Background HUD Corner Brackets -->
-                <path d="M 10 20 L 10 10 L 20 10" class="hud-svg-corner" />
-                <path d="M 250 20 L 250 10 L 240 10" class="hud-svg-corner" />
-                <path d="M 10 430 L 10 440 L 20 440" class="hud-svg-corner" />
-                <path d="M 250 430 L 250 440 L 240 440" class="hud-svg-corner" />
+                <!-- ==========================================================
+                     Layer 0: Background Technological HUD Environment
+                     ========================================================== -->
+                <!-- Corner Visors & Framing -->
+                <path d="M 8 22 L 8 8 L 22 8" class="hud-svg-corner" />
+                <path d="M 252 22 L 252 8 L 238 8" class="hud-svg-corner" />
+                <path d="M 8 428 L 8 442 L 22 442" class="hud-svg-corner" />
+                <path d="M 252 428 L 252 442 L 238 442" class="hud-svg-corner" />
 
-                <!-- Lateral Calibration Scales & Ticks -->
-                <line x1="10" y1="46" x2="16" y2="46" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
-                <line x1="10" y1="122" x2="16" y2="122" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
-                <line x1="10" y1="190" x2="16" y2="190" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
-                <line x1="10" y1="240" x2="16" y2="240" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
-                <line x1="10" y1="320" x2="16" y2="320" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
-                <line x1="10" y1="412" x2="16" y2="412" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
+                <!-- Circular Scanner Ring around Head -->
+                <circle cx="130" cy="46" r="38" stroke="rgba(56, 189, 248, 0.22)" stroke-width="0.8" stroke-dasharray="3 3" fill="none" />
+                <circle cx="130" cy="46" r="44" stroke="rgba(148, 163, 184, 0.12)" stroke-width="0.6" stroke-dasharray="1 5" fill="none" />
+                <line x1="92" y1="46" x2="86" y2="46" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
+                <line x1="174" y1="46" x2="168" y2="46" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
+                <line x1="130" y1="8" x2="130" y2="2" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
 
-                <line x1="244" y1="46" x2="250" y2="46" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
-                <line x1="244" y1="122" x2="250" y2="122" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
-                <line x1="244" y1="190" x2="250" y2="190" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
-                <line x1="244" y1="240" x2="250" y2="240" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
-                <line x1="244" y1="320" x2="250" y2="320" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
-                <line x1="244" y1="412" x2="250" y2="412" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
+                <!-- Feet Perspective 3D Elliptical Scanner Platform -->
+                <ellipse cx="130" cy="436" rx="64" ry="12" stroke="rgba(56, 189, 248, 0.3)" stroke-width="0.8" stroke-dasharray="4 3" fill="none" />
+                <ellipse cx="130" cy="436" rx="46" ry="8" stroke="rgba(148, 163, 184, 0.15)" stroke-width="0.6" fill="none" />
+                <line x1="66" y1="436" x2="194" y2="436" stroke="rgba(56, 189, 248, 0.15)" stroke-width="0.5" stroke-dasharray="2 4" />
 
-                <!-- Grid Calibration Horizontal Reference Lines -->
-                <line x1="18" y1="46" x2="242" y2="46" class="hud-svg-grid-line" />
-                <line x1="18" y1="122" x2="242" y2="122" class="hud-svg-grid-line" />
-                <line x1="18" y1="190" x2="242" y2="190" class="hud-svg-grid-line" />
-                <line x1="18" y1="240" x2="242" y2="240" class="hud-svg-grid-line" />
-                <line x1="18" y1="320" x2="242" y2="320" class="hud-svg-grid-line" />
-                <line x1="18" y1="412" x2="242" y2="412" class="hud-svg-grid-line" />
+                <!-- Lateral Telemetry Measurement Rulers -->
+                <line x1="14" y1="20" x2="14" y2="430" stroke="rgba(148, 163, 184, 0.15)" stroke-width="0.75" />
+                <line x1="246" y1="20" x2="246" y2="430" stroke="rgba(148, 163, 184, 0.15)" stroke-width="0.75" />
+                <!-- Ruler Ticks Left -->
+                <line x1="10" y1="46" x2="14" y2="46" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
+                <line x1="10" y1="122" x2="14" y2="122" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
+                <line x1="10" y1="190" x2="14" y2="190" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
+                <line x1="10" y1="240" x2="14" y2="240" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
+                <line x1="10" y1="320" x2="14" y2="320" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
+                <line x1="10" y1="412" x2="14" y2="412" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
+                <!-- Ruler Ticks Right -->
+                <line x1="246" y1="46" x2="250" y2="46" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
+                <line x1="246" y1="122" x2="250" y2="122" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
+                <line x1="246" y1="190" x2="250" y2="190" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
+                <line x1="246" y1="240" x2="250" y2="240" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
+                <line x1="246" y1="320" x2="250" y2="320" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
+                <line x1="246" y1="412" x2="250" y2="412" stroke="rgba(56, 189, 248, 0.4)" stroke-width="1" />
 
-                <!-- Vertical Center Axis of Symmetry -->
-                <line x1="130" y1="14" x2="130" y2="438" stroke="rgba(148, 163, 184, 0.12)" stroke-width="1" stroke-dasharray="4 4" />
+                <!-- Horizontal Scan Level Grid Lines -->
+                <line x1="14" y1="46" x2="246" y2="46" class="hud-svg-grid-line" />
+                <line x1="14" y1="122" x2="246" y2="122" class="hud-svg-grid-line" />
+                <line x1="14" y1="190" x2="246" y2="190" class="hud-svg-grid-line" />
+                <line x1="14" y1="240" x2="246" y2="240" class="hud-svg-grid-line" />
+                <line x1="14" y1="320" x2="246" y2="320" class="hud-svg-grid-line" />
+                <line x1="14" y1="412" x2="246" y2="412" class="hud-svg-grid-line" />
 
-                <!-- Tech Coordinate HUD Readout Labels -->
-                <text x="14" y="24" class="hud-svg-text">SCAN.01 // REF</text>
-                <text x="14" y="44" class="hud-svg-text">LVL.CRN</text>
-                <text x="14" y="120" class="hud-svg-text">LVL.THX</text>
-                <text x="14" y="188" class="hud-svg-text">LVL.ABD</text>
-                <text x="14" y="318" class="hud-svg-text">LVL.PAT</text>
+                <!-- Vertical Symmetry Line -->
+                <line x1="130" y1="14" x2="130" y2="436" stroke="rgba(148, 163, 184, 0.12)" stroke-width="1" stroke-dasharray="4 4" />
 
-                <text x="212" y="24" class="hud-svg-text">BIO.99.8%</text>
-                <text x="212" y="44" class="hud-svg-text">Z: +0.48</text>
-                <text x="212" y="120" class="hud-svg-text">FLX.ACT</text>
-                <text x="212" y="188" class="hud-svg-text">SYM.OK</text>
-                <text x="212" y="318" class="hud-svg-text">ART.NOM</text>
+                <!-- Technical HUD Elevation Text Labels -->
+                <text x="18" y="24" class="hud-svg-text">3D-BIO // M04</text>
+                <text x="18" y="44" class="hud-svg-text">LVL.CRN</text>
+                <text x="18" y="120" class="hud-svg-text">LVL.THX</text>
+                <text x="18" y="188" class="hud-svg-text">LVL.ABD</text>
+                <text x="18" y="238" class="hud-svg-text">LVL.PEL</text>
+                <text x="18" y="318" class="hud-svg-text">LVL.PAT</text>
+                <text x="18" y="410" class="hud-svg-text">LVL.MAL</text>
 
-                <!-- Technical Depth Scan Orbits (Holographic Ellipses) -->
-                <ellipse cx="130" cy="46" rx="36" ry="10" class="hud-svg-orbit" />
-                <ellipse cx="130" cy="122" rx="52" ry="13" class="hud-svg-orbit" />
+                <text x="210" y="24" class="hud-svg-text">VOX: 0.1mm</text>
+                <text x="210" y="44" class="hud-svg-text">Z: +0.48</text>
+                <text x="210" y="120" class="hud-svg-text">FLX.ACT</text>
+                <text x="210" y="188" class="hud-svg-text">SYM.OK</text>
+                <text x="210" y="238" class="hud-svg-text">PEL.99%</text>
+                <text x="210" y="318" class="hud-svg-text">ART.NOM</text>
+                <text x="210" y="410" class="hud-svg-text">PED.100%</text>
+
+                <!-- Holographic Scanning Crosshairs -->
+                <path d="M 82 94 L 86 94 M 84 92 L 84 96" stroke="rgba(56, 189, 248, 0.45)" stroke-width="0.8" />
+                <path d="M 174 94 L 178 94 M 176 92 L 176 96" stroke="rgba(56, 189, 248, 0.45)" stroke-width="0.8" />
+                <path d="M 106 236 L 110 236 M 108 234 L 108 238" stroke="rgba(56, 189, 248, 0.45)" stroke-width="0.8" />
+                <path d="M 150 236 L 154 236 M 152 234 L 152 238" stroke="rgba(56, 189, 248, 0.45)" stroke-width="0.8" />
+
+                <!-- Holographic Scanning Depth Ellipses -->
+                <ellipse cx="130" cy="46" rx="34" ry="9" class="hud-svg-orbit" />
+                <ellipse cx="130" cy="122" rx="50" ry="12" class="hud-svg-orbit" />
                 <ellipse cx="130" cy="190" rx="42" ry="11" class="hud-svg-orbit" />
                 <ellipse cx="130" cy="236" rx="46" ry="12" class="hud-svg-orbit" />
                 <ellipse cx="130" cy="320" rx="38" ry="9" class="hud-svg-orbit" />
 
                 <!-- ==========================================================
-                     Realistic Anatomical Internal Layer:
-                     Bones, Ribcage, Spine, Muscles, Articulations
+                     Layer 1: 3D Volumetric Anatomical Shading & Muscles
                      ========================================================== -->
-                <!-- Clavicles (Collarbones) -->
+                <!-- Pectoralis Major 3D Muscle Pads (Volumetric Chest) -->
+                <path d="M 130 94 C 120 92, 106 96, 98 108 C 94 122, 102 136, 116 138 C 124 138, 128 132, 130 128 Z" class="hud-3d-pad" />
+                <path d="M 130 94 C 140 92, 154 96, 162 108 C 166 122, 158 136, 144 138 C 136 138, 132 132, 130 128 Z" class="hud-3d-pad" />
+
+                <!-- Rectus Abdominis 6-Pack Matrix (Volumetric Abs) -->
+                <!-- Top Abs Pair -->
+                <rect x="114" y="162" width="14" height="13" rx="2.5" class="hud-3d-pad" />
+                <rect x="132" y="162" width="14" height="13" rx="2.5" class="hud-3d-pad" />
+                <!-- Mid Abs Pair -->
+                <rect x="115" y="179" width="13.5" height="13" rx="2.5" class="hud-3d-pad" />
+                <rect x="131.5" y="179" width="13.5" height="13" rx="2.5" class="hud-3d-pad" />
+                <!-- Lower Abs Pair -->
+                <rect x="116" y="196" width="13" height="14" rx="2.5" class="hud-3d-pad" />
+                <rect x="131" y="196" width="13" height="14" rx="2.5" class="hud-3d-pad" />
+
+                <!-- Quadriceps Femoris Muscle Bellies (3D Thighs) -->
+                <!-- Left Quads -->
+                <path d="M 100 248 C 102 268, 104 286, 107 302 C 112 302, 114 294, 115 284 C 116 268, 114 252, 111 248 Z" class="hud-3d-pad" />
+                <!-- Right Quads -->
+                <path d="M 160 248 C 158 268, 156 286, 153 302 C 148 302, 146 294, 145 284 C 144 268, 146 252, 149 248 Z" class="hud-3d-pad" />
+
+                <!-- Gastrocnemius Calf Muscle Pads (3D Calves) -->
+                <path d="M 101 346 C 98 360, 99 378, 103 392 C 107 392, 109 384, 110 372 C 110 360, 108 348, 106 346 Z" class="hud-3d-pad" />
+                <path d="M 159 346 C 162 360, 161 378, 157 392 C 153 392, 151 384, 150 372 C 150 360, 152 348, 154 346 Z" class="hud-3d-pad" />
+
+                <!-- Deltoids 3D Contour Lines -->
+                <path d="M 83 98 C 76 108, 76 122, 80 134 C 84 126, 88 114, 88 104 Z" class="hud-3d-pad" />
+                <path d="M 177 98 C 184 108, 184 122, 180 134 C 176 126, 172 114, 172 104 Z" class="hud-3d-pad" />
+
+                <!-- ==========================================================
+                     Layer 2: Skeletal Systems, Ribcage & Vertebral Column
+                     ========================================================== -->
+                <!-- Clavicles -->
                 <path d="M 130 88 C 118 85, 102 88, 85 96" class="hud-svg-bone" />
                 <path d="M 130 88 C 142 85, 158 88, 175 96" class="hud-svg-bone" />
 
-                <!-- Sternum & Cardiac Contour -->
-                <line x1="130" y1="88" x2="130" y2="152" stroke="rgba(148, 163, 184, 0.3)" stroke-width="1.2" stroke-linecap="round" />
+                <!-- Sternum & Heart Silhouette -->
+                <line x1="130" y1="88" x2="130" y2="152" stroke="rgba(148, 163, 184, 0.35)" stroke-width="1.2" stroke-linecap="round" />
                 <path d="M 130 110 C 142 110, 146 122, 142 132 C 138 140, 132 142, 130 144" class="hud-svg-muscle" />
 
-                <!-- 7 Pairs of Bilateral Thoracic Ribs -->
+                <!-- 7 Pairs of Bilateral 3D Curved Ribs -->
                 <!-- Left Ribs -->
                 <path d="M 128 100 C 118 97, 108 102, 103 108" class="hud-svg-rib" />
                 <path d="M 128 109 C 117 106, 106 112, 100 119" class="hud-svg-rib" />
@@ -274,9 +346,8 @@
                 <path d="M 132 149 C 144 146, 155 155, 157 166" class="hud-svg-rib" />
                 <path d="M 132 159 C 142 156, 152 165, 154 176" class="hud-svg-rib" />
 
-                <!-- Segmented Spinal Column (Vertebrae) -->
-                <line x1="130" y1="72" x2="130" y2="244" stroke="rgba(148, 163, 184, 0.28)" stroke-width="1.2" stroke-linecap="round" />
-                <!-- Vertebrae Notches -->
+                <!-- Segmented Spine & Vertebral Discs -->
+                <line x1="130" y1="72" x2="130" y2="244" stroke="rgba(148, 163, 184, 0.3)" stroke-width="1.2" stroke-linecap="round" />
                 <line x1="127" y1="78" x2="133" y2="78" class="hud-svg-bone" />
                 <line x1="126" y1="86" x2="134" y2="86" class="hud-svg-bone" />
                 <line x1="125" y1="96" x2="135" y2="96" class="hud-svg-bone" />
@@ -294,31 +365,20 @@
                 <line x1="126" y1="222" x2="134" y2="222" class="hud-svg-bone" />
                 <line x1="127" y1="234" x2="133" y2="234" class="hud-svg-bone" />
 
-                <!-- Pectoralis Major Muscle Arches -->
-                <path d="M 130 100 C 120 120, 105 126, 98 125" class="hud-svg-muscle" />
-                <path d="M 130 100 C 140 120, 155 126, 162 125" class="hud-svg-muscle" />
-
-                <!-- Abdominal Rectus & Linea Alba -->
-                <line x1="130" y1="154" x2="130" y2="230" stroke="rgba(56, 189, 248, 0.2)" stroke-width="0.8" stroke-dasharray="3 2" />
-                <path d="M 118 174 C 124 176, 136 176, 142 174" class="hud-svg-muscle" />
-                <path d="M 119 194 C 124 196, 136 196, 141 194" class="hud-svg-muscle" />
-                <path d="M 121 214 C 125 216, 135 216, 139 214" class="hud-svg-muscle" />
-
-                <!-- Pelvis & Inguinal Grooves -->
+                <!-- Pelvic Girdle & Sacrum -->
                 <path d="M 102 222 C 114 220, 126 230, 130 236 C 134 230, 146 220, 158 222" class="hud-svg-bone" />
                 <path d="M 104 228 C 116 236, 126 248, 130 248 C 134 248, 144 236, 156 228" class="hud-svg-bone" />
 
-                <!-- Arm Bones & Articulations -->
+                <!-- Extremity Skeletal Guides & Joint Pivots -->
                 <!-- Shoulders -->
                 <circle cx="84" cy="98" r="4.5" class="hud-svg-joint" />
                 <circle cx="176" cy="98" r="4.5" class="hud-svg-joint" />
-                <!-- Humeral Axis -->
                 <line x1="82" y1="104" x2="74" y2="176" class="hud-svg-bone" stroke-dasharray="3 2" />
                 <line x1="178" y1="104" x2="186" y2="176" class="hud-svg-bone" stroke-dasharray="3 2" />
                 <!-- Elbows -->
                 <circle cx="72" cy="180" r="3.5" class="hud-svg-joint" />
                 <circle cx="188" cy="180" r="3.5" class="hud-svg-joint" />
-                <!-- Forearm Dual Bones (Radius & Ulna) -->
+                <!-- Forearm Dual Bones -->
                 <line x1="71" y1="184" x2="68" y2="234" class="hud-svg-bone" stroke-dasharray="2 2" />
                 <line x1="74" y1="184" x2="72" y2="234" class="hud-svg-bone" stroke-dasharray="2 2" />
                 <line x1="189" y1="184" x2="192" y2="234" class="hud-svg-bone" stroke-dasharray="2 2" />
@@ -327,33 +387,23 @@
                 <circle cx="70" cy="237" r="2.8" class="hud-svg-joint" />
                 <circle cx="190" cy="237" r="2.8" class="hud-svg-joint" />
 
-                <!-- Leg Bones & Musculoskeletal Structure -->
-                <!-- Hip Sockets -->
+                <!-- Hip Articulations -->
                 <circle cx="108" cy="238" r="4.5" class="hud-svg-joint" />
                 <circle cx="152" cy="238" r="4.5" class="hud-svg-joint" />
-                <!-- Femoral Axis -->
                 <line x1="108" y1="244" x2="109" y2="312" class="hud-svg-bone" stroke-dasharray="4 2" />
                 <line x1="152" y1="244" x2="151" y2="312" class="hud-svg-bone" stroke-dasharray="4 2" />
-                <!-- Quadriceps Muscle Outlines -->
-                <path d="M 102 248 C 104 274, 106 294, 108 310" class="hud-svg-muscle" />
-                <path d="M 158 248 C 156 274, 154 294, 152 310" class="hud-svg-muscle" />
-                <path d="M 118 288 C 117 300, 114 308, 112 312" class="hud-svg-muscle" />
-                <path d="M 142 288 C 143 300, 146 308, 148 312" class="hud-svg-muscle" />
-                <!-- Patellar Rings -->
+                <!-- Patellar Knee Bones -->
                 <ellipse cx="109" cy="320" rx="5.5" ry="6.5" class="hud-svg-joint" />
                 <ellipse cx="151" cy="320" rx="5.5" ry="6.5" class="hud-svg-joint" />
-                <!-- Tibia Axis Lines -->
+                <!-- Lower Leg Tibia/Fibula -->
                 <line x1="109" y1="328" x2="109" y2="414" class="hud-svg-bone" stroke-dasharray="4 2" />
                 <line x1="151" y1="328" x2="151" y2="414" class="hud-svg-bone" stroke-dasharray="4 2" />
-                <!-- Calf Swell Muscle Lines -->
-                <path d="M 102 338 C 98 356, 100 376, 104 400" class="hud-svg-muscle" />
-                <path d="M 158 338 C 162 356, 160 376, 156 400" class="hud-svg-muscle" />
                 <!-- Ankles -->
                 <circle cx="109" cy="414" r="3.2" class="hud-svg-joint" />
                 <circle cx="151" cy="414" r="3.2" class="hud-svg-joint" />
 
                 <!-- ==========================================================
-                     Realistic Anatomical Male Body Scan Outline (Front View)
+                     Layer 3: Volumetric 3D Male Human Contour (Front View)
                      ========================================================== -->
                 <path class="body-contour" d="
                   M 130 22
@@ -417,12 +467,11 @@
                   C 112 30, 118 22, 130 22 Z" />
 
                 <!-- ==========================================================
-                     Interactive Clickable Heat Zones
-                     Preserving all IDs and data attributes
+                     Layer 4: Interactive Sensor Zones (10 Anatomical Regions)
+                     4 Mandatory Preserved Zones + 6 Extended Zones
                      ========================================================== -->
-                <!-- Heat Zone 1: HEAD (#zone-head) -->
+                <!-- Zone 1: HEAD (#zone-head) [Mandatory] -->
                 <g id="zone-head" class="heat-zone" data-zone-name="CRANIAL / NEUROLOGICAL" data-load="18%" data-temp="36.7 °C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Head thermal zone">
-                  <!-- Anatomical Cranial Shape -->
                   <path class="zone-glow-shape" d="M 130 22 C 142 22, 148 30, 148 44 C 148 56, 142 64, 137 68 L 136 72 C 132 73, 128 73, 124 72 L 123 68 C 118 64, 112 56, 112 44 C 112 30, 118 22, 130 22 Z" />
                   <ellipse cx="130" cy="45" rx="13" ry="17" fill="none" stroke="currentColor" stroke-width="0.75" stroke-dasharray="3 2" opacity="0.6" />
                   <circle cx="130" cy="45" r="3" class="zone-marker" />
@@ -431,40 +480,84 @@
                   <line x1="130" y1="37" x2="130" y2="53" stroke="currentColor" stroke-width="0.75" opacity="0.6" />
                 </g>
 
-                <!-- Heat Zone 2: CHEST (#zone-chest) -->
+                <!-- Zone 2: CHEST (#zone-chest) [Mandatory] -->
                 <g id="zone-chest" class="heat-zone" data-zone-name="THORACIC / CARDIOPULMONARY" data-load="34%" data-temp="37.1 °C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Chest thermal zone">
-                  <!-- Anatomical Thoracic Contour (Pectorals, Lungs, Cardiac Cavity) -->
-                  <path class="zone-glow-shape" d="M 130 88 C 118 86, 96 92, 88 100 C 86 112, 94 130, 98 136 C 102 148, 104 158, 107 166 C 116 162, 124 160, 130 160 C 136 160, 144 162, 153 166 C 156 158, 158 148, 162 136 C 166 130, 174 112, 172 100 C 164 92, 142 86, 130 88 Z" />
-                  <!-- Cardiopulmonary Target Reticle & Cardiac Pulse Indicator -->
+                  <path class="zone-glow-shape" d="M 130 88 C 118 86, 104 90, 98 98 C 96 114, 96 132, 98 146 C 104 158, 118 160, 130 160 C 142 160, 156 158, 162 146 C 164 132, 164 114, 162 98 C 156 90, 142 86, 130 88 Z" />
                   <circle cx="136" cy="122" r="4.5" class="zone-marker" />
                   <circle cx="136" cy="122" r="10" fill="none" stroke="currentColor" stroke-width="0.75" stroke-dasharray="2 2" class="zone-marker-pulse" />
                   <line x1="126" y1="122" x2="146" y2="122" stroke="currentColor" stroke-width="0.75" opacity="0.7" />
                   <line x1="136" y1="112" x2="136" y2="132" stroke="currentColor" stroke-width="0.75" opacity="0.7" />
                 </g>
 
-                <!-- Heat Zone 3: ABDOMEN (#zone-abdomen) -->
+                <!-- Zone 3: ABDOMEN (#zone-abdomen) [Mandatory] -->
                 <g id="zone-abdomen" class="heat-zone" data-zone-name="ABDOMINAL / CORE ORGANS" data-load="58%" data-temp="37.8 °C" data-status="ELEVATED" tabindex="0" role="button" aria-label="Abdomen thermal zone">
-                  <!-- Anatomical Core Shape (Lower Ribcage to Pelvis) -->
-                  <path class="zone-glow-shape" d="M 107 166 C 116 162, 124 160, 130 160 C 136 160, 144 162, 153 166 C 151 182, 152 198, 156 216 C 148 222, 140 226, 130 226 C 120 226, 112 222, 104 216 C 108 198, 109 182, 107 166 Z" />
-                  <!-- Visceral Target Center -->
+                  <path class="zone-glow-shape" d="M 101 164 C 114 162, 130 162, 144 162 C 151 162, 159 164, 159 164 C 153 182, 153 198, 156 218 C 148 224, 139 226, 130 226 C 121 226, 112 224, 104 218 C 107 198, 107 182, 101 164 Z" />
                   <circle cx="130" cy="190" r="3.8" class="zone-marker" />
                   <circle cx="130" cy="190" r="9" fill="none" stroke="currentColor" stroke-width="0.75" stroke-dasharray="2 2" class="zone-marker-pulse" />
                   <line x1="122" y1="190" x2="138" y2="190" stroke="currentColor" stroke-width="0.75" opacity="0.7" />
                   <line x1="130" y1="182" x2="130" y2="198" stroke="currentColor" stroke-width="0.75" opacity="0.7" />
                 </g>
 
-                <!-- Heat Zone 4: KNEES (#zone-knees) -->
+                <!-- Zone 4: KNEES (#zone-knees) [Mandatory] -->
                 <g id="zone-knees" class="heat-zone" data-zone-name="MUSCULOSKELETAL / KNEES" data-load="76%" data-temp="38.4 °C" data-status="WARNING" tabindex="0" role="button" aria-label="Knees thermal zone">
-                  <!-- Anatomical Left Knee Patellar Capsule -->
-                  <path class="zone-glow-shape" d="M 102 308 C 106 306, 114 306, 117 308 C 119 316, 118 328, 116 336 C 112 338, 105 338, 101 336 C 99 328, 99 316, 102 308 Z" />
+                  <!-- Left Patella -->
+                  <path class="zone-glow-shape" d="M 101 308 C 106 306, 114 306, 118 308 C 119 316, 118 328, 116 336 C 112 338, 105 338, 101 336 C 99 328, 99 316, 101 308 Z" />
                   <circle cx="109" cy="320" r="3" class="zone-marker" />
                   <circle cx="109" cy="320" r="7" fill="none" stroke="currentColor" stroke-width="0.75" stroke-dasharray="2 2" class="zone-marker-pulse" />
-                  <!-- Anatomical Right Knee Patellar Capsule -->
-                  <path class="zone-glow-shape" d="M 143 308 C 146 306, 154 306, 158 308 C 161 316, 161 328, 159 336 C 155 338, 148 338, 144 336 C 142 328, 141 316, 143 308 Z" />
+                  <!-- Right Patella -->
+                  <path class="zone-glow-shape" d="M 142 308 C 146 306, 154 306, 159 308 C 161 316, 161 328, 159 336 C 155 338, 148 338, 142 336 C 140 328, 140 316, 142 308 Z" />
                   <circle cx="151" cy="320" r="3" class="zone-marker" />
                   <circle cx="151" cy="320" r="7" fill="none" stroke="currentColor" stroke-width="0.75" stroke-dasharray="2 2" class="zone-marker-pulse" />
-                  <!-- Inter-patellar Biometric Alignment Bridge -->
-                  <line x1="117" y1="320" x2="143" y2="320" stroke="currentColor" stroke-width="0.75" stroke-dasharray="2 2" opacity="0.6" />
+                  <!-- Inter-patellar Alignment Line -->
+                  <line x1="118" y1="320" x2="142" y2="320" stroke="currentColor" stroke-width="0.75" stroke-dasharray="2 2" opacity="0.6" />
+                </g>
+
+                <!-- Zone 5: LEFT ARM (#zone-arms-left) [New] -->
+                <g id="zone-arms-left" class="heat-zone" data-zone-name="LEFT ARM / BRACHIAL & HAND" data-load="22%" data-temp="36.6 °C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Left arm sensor zone">
+                  <path class="zone-glow-shape" d="M 83 98 C 73 108, 73 124, 76 148 C 76 168, 72 194, 71 218 C 70 234, 73 256, 74 268 C 76 274, 80 274, 82 268 C 84 256, 84 238, 85 224 C 86 206, 88 178, 93 148 C 96 132, 95 116, 94 104 Z" />
+                  <circle cx="74" cy="180" r="3" class="zone-marker" />
+                  <circle cx="74" cy="180" r="7" fill="none" stroke="currentColor" stroke-width="0.75" stroke-dasharray="2 2" class="zone-marker-pulse" />
+                  <circle cx="73" cy="238" r="2.5" class="zone-marker" />
+                </g>
+
+                <!-- Zone 6: RIGHT ARM (#zone-arms-right) [New] -->
+                <g id="zone-arms-right" class="heat-zone" data-zone-name="RIGHT ARM / BRACHIAL & HAND" data-load="41%" data-temp="36.9 °C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Right arm sensor zone">
+                  <path class="zone-glow-shape" d="M 177 98 C 187 108, 187 124, 184 148 C 184 168, 188 194, 189 218 C 190 234, 187 256, 186 268 C 184 274, 180 274, 178 268 C 176 256, 176 238, 175 224 C 174 206, 172 178, 167 148 C 164 132, 165 116, 166 104 Z" />
+                  <circle cx="186" cy="180" r="3" class="zone-marker" />
+                  <circle cx="186" cy="180" r="7" fill="none" stroke="currentColor" stroke-width="0.75" stroke-dasharray="2 2" class="zone-marker-pulse" />
+                  <circle cx="187" cy="238" r="2.5" class="zone-marker" />
+                </g>
+
+                <!-- Zone 7: LEFT HIP & THIGH (#zone-hips-left) [New] -->
+                <g id="zone-hips-left" class="heat-zone" data-zone-name="LEFT PELVIS & FEMORAL THIGH" data-load="32%" data-temp="36.8 °C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Left hip and thigh sensor zone">
+                  <path class="zone-glow-shape" d="M 102 224 C 114 226, 124 230, 128 238 C 127 256, 121 282, 117 304 L 102 304 C 98 282, 95 258, 95 244 C 95 234, 98 226, 102 224 Z" />
+                  <circle cx="108" cy="240" r="3.5" class="zone-marker" />
+                  <circle cx="108" cy="240" r="8" fill="none" stroke="currentColor" stroke-width="0.75" stroke-dasharray="2 2" class="zone-marker-pulse" />
+                  <circle cx="110" cy="274" r="2.5" class="zone-marker" />
+                </g>
+
+                <!-- Zone 8: RIGHT HIP & THIGH (#zone-hips-right) [New] -->
+                <g id="zone-hips-right" class="heat-zone" data-zone-name="RIGHT PELVIS & FEMORAL THIGH" data-load="54%" data-temp="37.5 °C" data-status="ELEVATED" tabindex="0" role="button" aria-label="Right hip and thigh sensor zone">
+                  <path class="zone-glow-shape" d="M 158 224 C 146 226, 136 230, 132 238 C 133 256, 139 282, 143 304 L 158 304 C 162 282, 165 258, 165 244 C 165 234, 162 226, 158 224 Z" />
+                  <circle cx="152" cy="240" r="3.5" class="zone-marker" />
+                  <circle cx="152" cy="240" r="8" fill="none" stroke="currentColor" stroke-width="0.75" stroke-dasharray="2 2" class="zone-marker-pulse" />
+                  <circle cx="150" cy="274" r="2.5" class="zone-marker" />
+                </g>
+
+                <!-- Zone 9: LEFT LOWER LEG & FOOT (#zone-legs-left) [New] -->
+                <g id="zone-legs-left" class="heat-zone" data-zone-name="LEFT SHIN, CALF & FOOT" data-load="28%" data-temp="36.5 °C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Left leg and foot sensor zone">
+                  <path class="zone-glow-shape" d="M 101 340 L 117 340 C 116 358, 116 384, 117 410 C 117 418, 118 428, 118 436 L 108 440 C 104 438, 105 432, 106 424 C 106 412, 102 384, 100 360 C 99 350, 100 344, 101 340 Z" />
+                  <circle cx="109" cy="372" r="3" class="zone-marker" />
+                  <circle cx="109" cy="372" r="7" fill="none" stroke="currentColor" stroke-width="0.75" stroke-dasharray="2 2" class="zone-marker-pulse" />
+                  <circle cx="109" cy="414" r="2.5" class="zone-marker" />
+                </g>
+
+                <!-- Zone 10: RIGHT LOWER LEG & FOOT (#zone-legs-right) [New] -->
+                <g id="zone-legs-right" class="heat-zone" data-zone-name="RIGHT SHIN, CALF & FOOT" data-load="62%" data-temp="37.6 °C" data-status="ELEVATED" tabindex="0" role="button" aria-label="Right leg and foot sensor zone">
+                  <path class="zone-glow-shape" d="M 143 340 L 159 340 C 160 344, 161 350, 160 360 C 158 384, 154 412, 154 424 C 155 432, 156 438, 152 440 L 142 436 C 142 428, 143 418, 143 410 C 144 384, 144 358, 143 340 Z" />
+                  <circle cx="151" cy="372" r="3" class="zone-marker" />
+                  <circle cx="151" cy="372" r="7" fill="none" stroke="currentColor" stroke-width="0.75" stroke-dasharray="2 2" class="zone-marker-pulse" />
+                  <circle cx="151" cy="414" r="2.5" class="zone-marker" />
                 </g>
               </svg>
             </div>
