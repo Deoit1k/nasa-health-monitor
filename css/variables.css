@@ -1,65 +1,74 @@
 /**
  * NASA BIOMEDICAL TELEMETRY CORE
- * Global Design Tokens & Variables
+ * Refined Visual Tokens — Deep Dark Theme & High-Legibility Typography
  */
 
 :root {
-  /* Color Palette: Dark Space & Soft Neon */
-  --bg-space: #050b14;
-  --bg-surface: #091322;
-  --bg-surface-elevated: #0d1a2d;
-  --bg-surface-translucent: rgba(9, 19, 34, 0.75);
-  --bg-card: rgba(13, 26, 45, 0.65);
-  --bg-card-hover: rgba(18, 35, 60, 0.85);
+  /* Color Palette: Deep Graphite & Balanced Dark Surfaces */
+  --bg-space: #080c14;
+  --bg-surface: #0f1623;
+  --bg-surface-elevated: #161f30;
+  --bg-surface-translucent: rgba(15, 22, 35, 0.88);
+  --bg-card: #0f1623;
+  --bg-card-hover: #161f30;
 
-  /* Neon Accents */
-  --neon-cyan: #00e5ff;
-  --neon-cyan-dim: rgba(0, 229, 255, 0.25);
-  --neon-cyan-ultradim: rgba(0, 229, 255, 0.08);
-  --neon-blue: #0088ff;
-  --neon-purple: #9d4edd;
-  
-  /* Status Colors */
-  --status-nominal: #00ff88;
-  --status-nominal-dim: rgba(0, 255, 136, 0.2);
-  --status-info: #00e5ff;
-  --status-info-dim: rgba(0, 229, 255, 0.2);
-  --status-elevated: #ffd600;
-  --status-elevated-dim: rgba(255, 214, 0, 0.2);
-  --status-warning: #ff9100;
-  --status-warning-dim: rgba(255, 145, 0, 0.2);
-  --status-critical: #ff2a55;
-  --status-critical-dim: rgba(255, 42, 85, 0.2);
+  /* Refined Calm Cosmic Sky Blue Accent */
+  --accent-blue: #38bdf8;
+  --accent-blue-dim: rgba(56, 189, 248, 0.15);
+  --accent-blue-ultradim: rgba(56, 189, 248, 0.05);
 
-  /* Typography Colors */
-  --text-primary: #e6f6ff;
-  --text-secondary: #88a7c4;
-  --text-muted: #4e6b88;
+  /* Legacy & Compatibility Tokens mapped to calm palette */
+  --neon-cyan: #38bdf8;
+  --neon-cyan-dim: rgba(56, 189, 248, 0.15);
+  --neon-cyan-ultradim: rgba(56, 189, 248, 0.05);
+  --neon-blue: #60a5fa;
+  --neon-purple: #a78bfa;
+
+  /* Status Colors — High Contrast, Softer Hue */
+  --status-nominal: #34d399;
+  --status-nominal-dim: rgba(52, 211, 153, 0.14);
+  --status-info: #38bdf8;
+  --status-info-dim: rgba(56, 189, 248, 0.14);
+  --status-elevated: #fbbf24;
+  --status-elevated-dim: rgba(251, 191, 36, 0.14);
+  --status-warning: #fb923c;
+  --status-warning-dim: rgba(251, 146, 60, 0.14);
+  --status-critical: #f87171;
+  --status-critical-dim: rgba(248, 113, 113, 0.16);
+
+  /* Typography Colors — Slate Hierarchy */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
   --text-highlight: #ffffff;
 
-  /* Borders & Glows */
-  --border-subtle: rgba(0, 229, 255, 0.15);
-  --border-active: rgba(0, 229, 255, 0.45);
-  --border-bright: #00e5ff;
-  
-  --glow-subtle: 0 0 10px rgba(0, 229, 255, 0.2);
-  --glow-cyan: 0 0 15px rgba(0, 229, 255, 0.45);
-  --glow-cyan-intense: 0 0 25px rgba(0, 229, 255, 0.75);
-  --glow-red: 0 0 18px rgba(255, 42, 85, 0.5);
-  --glow-green: 0 0 18px rgba(0, 255, 136, 0.5);
+  /* Restrained Thin Borders (No Acid Glow) */
+  --border-subtle: rgba(148, 163, 184, 0.16);
+  --border-active: rgba(56, 189, 248, 0.40);
+  --border-bright: #38bdf8;
 
-  /* Typography */
-  --font-display: 'Orbitron', 'Rajdhani', -apple-system, sans-serif;
-  --font-mono: 'Share Tech Mono', 'Courier New', monospace;
-  --font-body: 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Gentle Shadows (Eye-Friendly) */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px -2px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 30px -4px rgba(0, 0, 0, 0.65);
+  --glow-subtle: 0 0 12px rgba(56, 189, 248, 0.12);
+  --glow-cyan: 0 0 14px rgba(56, 189, 248, 0.25);
+  --glow-red: 0 0 14px rgba(248, 113, 113, 0.25);
+  --glow-green: 0 0 14px rgba(52, 211, 153, 0.25);
 
-  /* HUD Radii & Spacing */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  /* Typography Stack */
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-brand: 'Orbitron', 'Inter', sans-serif;
+
+  /* HUD Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
 
   /* Transitions */
   --transition-fast: 0.15s ease-out;
-  --transition-normal: 0.25s ease-in-out;
-  --transition-slow: 0.4s ease;
+  --transition-normal: 0.22s ease-in-out;
+  --transition-slow: 0.35s ease;
 }

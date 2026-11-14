@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
   <title>NASA // Biomedical Telemetry Core</title>
 
-  <!-- Google Fonts for High-Tech HUD Styling -->
+  <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
 
   <!-- Modular CSS Architecture -->
   <link rel="stylesheet" href="css/variables.css">
@@ -36,7 +37,7 @@
     </div>
     <div class="tooltip-row">
       <span class="label">PERFUSION:</span>
-      <span class="val" style="color: var(--neon-cyan);">OPTIMAL</span>
+      <span class="val" style="color: var(--accent-blue);">OPTIMAL</span>
     </div>
   </div>
 
@@ -183,11 +184,11 @@
                 </defs>
 
                 <!-- Grid Calibration Lines -->
-                <line x1="20" y1="50" x2="240" y2="50" stroke="rgba(0, 229, 255, 0.08)" stroke-width="1" stroke-dasharray="2 4"/>
-                <line x1="20" y1="130" x2="240" y2="130" stroke="rgba(0, 229, 255, 0.08)" stroke-width="1" stroke-dasharray="2 4"/>
-                <line x1="20" y1="190" x2="240" y2="190" stroke="rgba(0, 229, 255, 0.08)" stroke-width="1" stroke-dasharray="2 4"/>
-                <line x1="20" y1="310" x2="240" y2="310" stroke="rgba(0, 229, 255, 0.08)" stroke-width="1" stroke-dasharray="2 4"/>
-                <line x1="130" y1="20" x2="130" y2="430" stroke="rgba(0, 229, 255, 0.12)" stroke-width="1" stroke-dasharray="4 4"/>
+                <line x1="20" y1="50" x2="240" y2="50" stroke="rgba(148, 163, 184, 0.10)" stroke-width="1" stroke-dasharray="2 4"/>
+                <line x1="20" y1="130" x2="240" y2="130" stroke="rgba(148, 163, 184, 0.10)" stroke-width="1" stroke-dasharray="2 4"/>
+                <line x1="20" y1="190" x2="240" y2="190" stroke="rgba(148, 163, 184, 0.10)" stroke-width="1" stroke-dasharray="2 4"/>
+                <line x1="20" y1="310" x2="240" y2="310" stroke="rgba(148, 163, 184, 0.10)" stroke-width="1" stroke-dasharray="2 4"/>
+                <line x1="130" y1="20" x2="130" y2="430" stroke="rgba(148, 163, 184, 0.12)" stroke-width="1" stroke-dasharray="4 4"/>
 
                 <!-- Human Body Silhouette Base Contour -->
                 <path class="body-contour" d="
@@ -241,23 +242,23 @@
                 <g id="zone-head" class="heat-zone" data-zone-name="CRANIAL / NEUROLOGICAL" data-load="18%" data-temp="36.7 °C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Head thermal zone">
                   <ellipse class="zone-glow-shape" cx="130" cy="45" rx="19" ry="24" />
                   <circle cx="130" cy="45" r="3" class="zone-marker" />
-                  <line x1="124" y1="45" x2="136" y2="45" stroke="#00e5ff" stroke-width="1"/>
-                  <line x1="130" y1="39" x2="130" y2="51" stroke="#00e5ff" stroke-width="1"/>
+                  <line x1="124" y1="45" x2="136" y2="45" stroke="#38bdf8" stroke-width="1"/>
+                  <line x1="130" y1="39" x2="130" y2="51" stroke="#38bdf8" stroke-width="1"/>
                 </g>
 
                 <!-- Heat Zone 2: CHEST (#zone-chest) -->
                 <g id="zone-chest" class="heat-zone" data-zone-name="THORACIC / CARDIOPULMONARY" data-load="34%" data-temp="37.1 °C" data-status="NOMINAL" tabindex="0" role="button" aria-label="Chest thermal zone">
                   <path class="zone-glow-shape" d="M 112 100 C 112 90, 148 90, 148 100 C 154 118, 152 136, 146 142 C 136 148, 124 148, 114 142 C 108 136, 106 118, 112 100 Z" />
                   <circle cx="130" cy="120" r="4" class="zone-marker" />
-                  <circle cx="130" cy="120" r="8" fill="none" stroke="#00ff88" stroke-width="0.8" stroke-dasharray="2 2"/>
+                  <circle cx="130" cy="120" r="8" fill="none" stroke="#34d399" stroke-width="0.8" stroke-dasharray="2 2"/>
                 </g>
 
                 <!-- Heat Zone 3: ABDOMEN (#zone-abdomen) -->
                 <g id="zone-abdomen" class="heat-zone" data-zone-name="ABDOMINAL / CORE ORGANS" data-load="58%" data-temp="37.8 °C" data-status="ELEVATED" tabindex="0" role="button" aria-label="Abdomen thermal zone">
                   <path class="zone-glow-shape" d="M 116 156 C 122 152, 138 152, 144 156 C 148 170, 146 186, 142 196 C 134 200, 126 200, 118 196 C 114 186, 112 170, 116 156 Z" />
                   <circle cx="130" cy="176" r="3.5" class="zone-marker" />
-                  <line x1="123" y1="176" x2="137" y2="176" stroke="#ffd600" stroke-width="1"/>
-                  <line x1="130" y1="169" x2="130" y2="183" stroke="#ffd600" stroke-width="1"/>
+                  <line x1="123" y1="176" x2="137" y2="176" stroke="#fbbf24" stroke-width="1"/>
+                  <line x1="130" y1="169" x2="130" y2="183" stroke="#fbbf24" stroke-width="1"/>
                 </g>
 
                 <!-- Heat Zone 4: KNEES (#zone-knees) -->
