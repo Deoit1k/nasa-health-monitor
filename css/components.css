@@ -1,0 +1,688 @@
+/**
+ * NASA BIOMEDICAL TELEMETRY CORE
+ * UI Components, SVG Silhouette, Controls & Floating Tooltip
+ */
+
+/* ==========================================================================
+   1. Vital Telemetry Stat Cards
+   ========================================================================== */
+.vital-card {
+  background: var(--bg-surface-translucent);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  transition: transform var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.vital-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-active);
+  box-shadow: var(--glow-subtle);
+}
+
+.vital-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.vital-label-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.vital-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.vital-code {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.vital-status-pill {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid currentColor;
+  text-transform: uppercase;
+}
+
+.status-nominal {
+  color: var(--status-nominal);
+  background: var(--status-nominal-dim);
+  border-color: var(--status-nominal);
+}
+
+.status-elevated {
+  color: var(--status-elevated);
+  background: var(--status-elevated-dim);
+  border-color: var(--status-elevated);
+}
+
+.status-critical {
+  color: var(--status-critical);
+  background: var(--status-critical-dim);
+  border-color: var(--status-critical);
+}
+
+.status-warning {
+  color: var(--status-warning);
+  background: var(--status-warning-dim);
+  border-color: var(--status-warning);
+}
+
+.vital-value-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.vital-value {
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-highlight);
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.35);
+}
+
+.vital-unit {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--neon-cyan);
+}
+
+.vital-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.vital-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--neon-cyan), #00ff88);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.vital-bar-fill.warn {
+  background: linear-gradient(90deg, var(--status-elevated), var(--status-critical));
+}
+
+
+/* ==========================================================================
+   2. Interactive Silhouette & Thermal Zone Display
+   ========================================================================== */
+.silhouette-stage {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 20px;
+  position: relative;
+  min-height: 480px;
+  background: radial-gradient(circle at 50% 50%, rgba(0, 229, 255, 0.05) 0%, transparent 70%);
+  border-radius: var(--radius-sm);
+  border: 1px dashed rgba(0, 229, 255, 0.12);
+  padding: 16px;
+  overflow: hidden;
+}
+
+/* Background Radar Circles on Silhouette */
+.silhouette-radar-circle {
+  position: absolute;
+  top: 50%;
+  left: 45%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 229, 255, 0.1);
+  pointer-events: none;
+}
+.circle-1 { width: 340px; height: 340px; }
+.circle-2 { width: 440px; height: 440px; border-style: dotted; }
+
+/* Vertical Laser Scanner Beam */
+.scanner-laser {
+  position: absolute;
+  left: 10%;
+  right: 18%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+  box-shadow: 0 0 10px var(--neon-cyan);
+  pointer-events: none;
+  animation: scan-sweep 4.5s ease-in-out infinite alternate;
+  z-index: 5;
+  opacity: 0.75;
+}
+
+@keyframes scan-sweep {
+  0% { top: 6%; opacity: 0.2; }
+  15% { opacity: 0.85; }
+  85% { opacity: 0.85; }
+  100% { top: 92%; opacity: 0.2; }
+}
+
+/* Human SVG Container */
+.silhouette-svg-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
+
+.silhouette-svg {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  max-height: 450px;
+  filter: drop-shadow(0 0 14px rgba(0, 229, 255, 0.2));
+  user-select: none;
+}
+
+/* Body Wireframe Path */
+.body-contour {
+  fill: rgba(0, 229, 255, 0.04);
+  stroke: rgba(0, 229, 255, 0.35);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 2;
+  transition: all var(--transition-normal);
+}
+
+.body-bone-structure {
+  stroke: rgba(0, 229, 255, 0.2);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+/* Interactive Heat Zones */
+.heat-zone {
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  transform-origin: center;
+}
+
+.zone-glow-shape {
+  fill: rgba(0, 229, 255, 0.15);
+  stroke: var(--neon-cyan);
+  stroke-width: 1.5;
+  transition: all 0.25s ease;
+}
+
+/* Individual zone color presets (nominal/elevated/warning) */
+#zone-head .zone-glow-shape {
+  fill: rgba(0, 229, 255, 0.22);
+  stroke: #00e5ff;
+}
+
+#zone-chest .zone-glow-shape {
+  fill: rgba(0, 255, 136, 0.25);
+  stroke: #00ff88;
+}
+
+#zone-abdomen .zone-glow-shape {
+  fill: rgba(255, 214, 0, 0.25);
+  stroke: #ffd600;
+}
+
+#zone-knees .zone-glow-shape {
+  fill: rgba(255, 145, 0, 0.25);
+  stroke: #ff9100;
+}
+
+/* Zone Hover States */
+.heat-zone:hover .zone-glow-shape {
+  fill-opacity: 0.65;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 12px currentColor);
+}
+
+#zone-head:hover .zone-glow-shape {
+  fill: rgba(0, 229, 255, 0.5);
+  stroke: #ffffff;
+  filter: drop-shadow(0 0 14px #00e5ff);
+}
+
+#zone-chest:hover .zone-glow-shape {
+  fill: rgba(0, 255, 136, 0.55);
+  stroke: #ffffff;
+  filter: drop-shadow(0 0 14px #00ff88);
+}
+
+#zone-abdomen:hover .zone-glow-shape {
+  fill: rgba(255, 214, 0, 0.55);
+  stroke: #ffffff;
+  filter: drop-shadow(0 0 14px #ffd600);
+}
+
+#zone-knees:hover .zone-glow-shape {
+  fill: rgba(255, 145, 0, 0.55);
+  stroke: #ffffff;
+  filter: drop-shadow(0 0 14px #ff9100);
+}
+
+/* Target Reticles / Crosshairs on Zones */
+.zone-marker {
+  fill: var(--neon-cyan);
+  opacity: 0.85;
+}
+
+
+/* ==========================================================================
+   3. Vertical Gradient Heat Scale
+   ========================================================================== */
+.thermal-scale-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  width: 58px;
+  z-index: 10;
+}
+
+.thermal-scale-title {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+  margin-bottom: 8px;
+}
+
+.thermal-scale-container {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  flex: 1;
+  max-height: 380px;
+}
+
+.thermal-gradient-bar {
+  width: 14px;
+  border-radius: 7px;
+  background: linear-gradient(
+    to bottom,
+    #ff2a55 0%,      /* Critical Red */
+    #ff9100 28%,     /* Warning Orange */
+    #ffd600 55%,     /* Elevated Yellow */
+    #00e5ff 78%,     /* Cyan Active */
+    #00ff88 100%     /* Optimal Green */
+  );
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.3), inset 0 0 4px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  position: relative;
+}
+
+.thermal-scale-divisions {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+}
+
+.scale-mark {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1;
+}
+
+.scale-mark::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 1px;
+  background-color: var(--text-muted);
+}
+
+.scale-mark.crit { color: var(--status-critical); }
+.scale-mark.warn { color: var(--status-warning); }
+.scale-mark.elev { color: var(--status-elevated); }
+.scale-mark.nom  { color: var(--neon-cyan); }
+.scale-mark.opt  { color: var(--status-nominal); }
+
+
+/* ==========================================================================
+   4. Floating Tooltip (Strictly Left of Cursor)
+   ========================================================================== */
+.hud-tooltip {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 210px;
+  max-width: 260px;
+  padding: 12px 14px;
+  background: rgba(5, 11, 20, 0.92);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--neon-cyan);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 15px rgba(0, 229, 255, 0.1);
+  transform: translate(0, -50%);
+  transition: opacity 0.12s ease-out;
+}
+
+/* Tooltip Tech Accents */
+.hud-tooltip::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -6px;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 6px solid var(--neon-cyan);
+}
+
+.tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 6px;
+}
+
+.tooltip-title {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+}
+
+.tooltip-badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 1px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.tooltip-row .label {
+  color: var(--text-secondary);
+  letter-spacing: 0.8px;
+}
+
+.tooltip-row .val {
+  font-weight: 700;
+  color: var(--text-highlight);
+}
+
+
+/* ==========================================================================
+   5. Chart Containers & Glow Canvas
+   ========================================================================== */
+.chart-container-box {
+  position: relative;
+  width: 100%;
+  height: 220px;
+}
+
+.chart-header-sub {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.chart-legend-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.chart-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 6px currentColor;
+}
+.chart-dot.red { color: #ff2a55; background: #ff2a55; }
+.chart-dot.cyan { color: #00e5ff; background: #00e5ff; }
+
+
+/* ==========================================================================
+   6. Simulation Controls Panel
+   ========================================================================== */
+.sim-controls-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.form-label {
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.form-value-pill {
+  color: var(--neon-cyan);
+  font-weight: 700;
+  background: var(--neon-cyan-ultradim);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Sci-Fi Select Input */
+.sim-select {
+  appearance: none;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-active);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  outline: none;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300e5ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+}
+
+.sim-select:hover, .sim-select:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+.sim-select option {
+  background: var(--bg-surface-elevated);
+  color: var(--text-primary);
+}
+
+/* Custom Neon Sliders */
+.sim-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(0, 229, 255, 0.12);
+  outline: none;
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.sim-slider:hover {
+  background: rgba(0, 229, 255, 0.2);
+  border-color: var(--border-active);
+}
+
+.sim-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--neon-cyan);
+  border: 2px solid #ffffff;
+  transition: transform 0.15s ease;
+}
+
+.sim-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.sim-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--neon-cyan);
+  border: 2px solid #ffffff;
+}
+
+
+/* ==========================================================================
+   7. Protocols & Action Recommendations Container
+   ========================================================================== */
+.protocols-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  max-height: 250px;
+  padding-right: 4px;
+}
+
+.protocol-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(9, 19, 34, 0.85);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--neon-cyan);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  transition: all var(--transition-normal);
+}
+
+.protocol-card:hover {
+  border-color: var(--border-active);
+  background: rgba(13, 26, 45, 0.95);
+  transform: translateX(2px);
+}
+
+.protocol-card.p-crit {
+  border-left-color: var(--status-critical);
+}
+
+.protocol-card.p-warn {
+  border-left-color: var(--status-warning);
+}
+
+.protocol-card.p-nom {
+  border-left-color: var(--status-nominal);
+}
+
+.protocol-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.protocol-title {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-highlight);
+}
+
+.protocol-badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.protocol-desc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+.protocol-action-btn {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 3px 10px;
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid var(--neon-cyan);
+  border-radius: var(--radius-sm);
+  color: var(--neon-cyan);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  cursor: pointer;
+  letter-spacing: 0.8px;
+  transition: all var(--transition-fast);
+}
+
+.protocol-action-btn:hover {
+  background: var(--neon-cyan);
+  color: var(--bg-space);
+  box-shadow: var(--glow-cyan);
+}
