@@ -483,19 +483,19 @@
         'zone-legs-right':   { top: '82%',   left: '58%' }
       },
       female: {
-        'zone-head':         { top: '17.5%', left: '50%' },
-        'zone-neck':         { top: '24%',   left: '50%' },
+        'zone-head':         { top: '14.5%', left: '50%' },
+        'zone-neck':         { top: '22.5%', left: '50%' },
         'zone-chest':        { top: '31%',   left: '50%' },
-        'zone-abdomen':      { top: '42%',   left: '50%' },
-        'zone-elbows-left':  { top: '39%',   left: '33%' },
-        'zone-elbows-right': { top: '39%',   left: '67%' },
-        'zone-arms-left':    { top: '48%',   left: '31%' },
-        'zone-arms-right':   { top: '48%',   left: '69%' },
-        'zone-hips-left':    { top: '56%',   left: '43%' },
-        'zone-hips-right':   { top: '56%',   left: '57%' },
-        'zone-knees':        { top: '69%',   left: '50%' },
-        'zone-legs-left':    { top: '80%',   left: '43%' },
-        'zone-legs-right':   { top: '80%',   left: '57%' }
+        'zone-abdomen':      { top: '42.5%', left: '50%' },
+        'zone-elbows-left':  { top: '39.5%', left: '39%' },
+        'zone-elbows-right': { top: '39.5%', left: '61%' },
+        'zone-arms-left':    { top: '49.5%', left: '36%' },
+        'zone-arms-right':   { top: '49.5%', left: '64%' },
+        'zone-hips-left':    { top: '56%',   left: '43.5%' },
+        'zone-hips-right':   { top: '56%',   left: '56.5%' },
+        'zone-knees':        { top: '70%',   left: '50%' },
+        'zone-legs-left':    { top: '81%',   left: '45%' },
+        'zone-legs-right':   { top: '81%',   left: '55%' }
       }
     };
 
@@ -509,6 +509,15 @@
           el.style.left = set[id].left;
         }
       });
+      // Adjust knees spacing for female vs male if needed
+      var kneesEl = document.getElementById('zone-knees');
+      if (kneesEl) {
+        if (gender === 'female') {
+          kneesEl.style.width = '36px';
+        } else {
+          kneesEl.style.width = '62px';
+        }
+      }
     }
 
     function setGender(gender) {

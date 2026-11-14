@@ -868,6 +868,7 @@
   max-width: 320px;
   line-height: 0;          /* collapse inline-block gap */
   background: transparent; /* no dark bounding box */
+  mix-blend-mode: lighten; /* blend seamlessly into dark card background */
 }
 
 /* The 3D render image styled as a bright cyan/blue NASA HUD hologram */
