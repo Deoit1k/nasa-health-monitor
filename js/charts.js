@@ -263,12 +263,8 @@ function initSilhouetteInteraction() {
   const tooltipTemp = document.getElementById('tooltip-zone-temp');
   const tooltipStatus = document.getElementById('tooltip-zone-status');
 
-  const zoneHead = document.getElementById('zone-head');
-  const zoneChest = document.getElementById('zone-chest');
-  const zoneAbdomen = document.getElementById('zone-abdomen');
-  const zoneKnees = document.getElementById('zone-knees');
-
-  const zones = [zoneHead, zoneChest, zoneAbdomen, zoneKnees].filter(Boolean);
+  // Select all interactive heat zones (both mandatory core zones and expanded limbs/hips/legs)
+  const zones = Array.from(document.querySelectorAll('.heat-zone'));
 
   function updateTooltipContent(zone) {
     const name = zone.getAttribute('data-zone-name') || 'BIOMETRIC ZONE';
