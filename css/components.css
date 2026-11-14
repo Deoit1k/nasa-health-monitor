@@ -817,3 +817,198 @@
   background: var(--accent-blue);
   color: #080c14;
 }
+
+
+/* ==========================================================================
+   8. Gender Switcher (MALE / FEMALE) — NASA HUD style
+   ========================================================================== */
+.gender-switcher {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.gender-btn {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.gender-btn:hover {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+.gender-btn.active {
+  background: var(--accent-blue-dim);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.25);
+}
+
+
+/* ==========================================================================
+   9. 3D Holographic Body Render Stage
+   ========================================================================== */
+
+/* Wrapper that sizes to match the image and positions overlays absolutely */
+.body-3d-stage {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 320px;
+  line-height: 0;          /* collapse inline-block gap */
+}
+
+/* The 3D render image styled as a neon-blue hologram */
+.body-3d-render {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+  /* Holographic colour shift: inverts whites→dark, then cyan-tints */
+  filter:
+    invert(1)
+    hue-rotate(180deg)
+    brightness(0.95)
+    contrast(1.2)
+    sepia(0.3)
+    saturate(2.5);
+  mix-blend-mode: screen;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* HUD corner-frame SVG sits on top of the image, full size */
+.hud-frame-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+
+/* ==========================================================================
+   10. Div-based Heat-Zone Overlays (replace SVG <g> zones)
+   ========================================================================== */
+
+/* Base zone — absolutely positioned relative to .body-3d-stage */
+.heat-zone-div {
+  position: absolute;
+  border-radius: 50%;           /* soft oval glow patch */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  transition: all 0.22s ease-in-out;
+  z-index: 20;
+  /* radial-gradient "heat spot" base — overridden per colour variant */
+  background: radial-gradient(ellipse at center,
+    rgba(56, 189, 248, 0.22) 0%,
+    rgba(56, 189, 248, 0.08) 50%,
+    transparent 75%);
+}
+
+/* Hover / focus glow intensification */
+.heat-zone-div:hover,
+.heat-zone-div:focus {
+  background: radial-gradient(ellipse at center,
+    rgba(56, 189, 248, 0.45) 0%,
+    rgba(56, 189, 248, 0.20) 50%,
+    transparent 75%);
+  filter: drop-shadow(0 0 10px currentColor);
+}
+
+/* Pulsing dot-marker in the centre of each zone */
+.zone-dot-marker {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.9;
+  animation: zone-dot-pulse 2.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes zone-dot-pulse {
+  0%, 100% { transform: scale(1);    opacity: 0.9; }
+  50%       { transform: scale(1.35); opacity: 0.45; }
+}
+
+/* ── Colour variants ────────────────────────────────────────────────────── */
+/* Blue — NOMINAL / cranial, neck, elbows */
+.zone-blue {
+  color: var(--accent-blue);
+  background: radial-gradient(ellipse at center,
+    rgba(56, 189, 248, 0.26) 0%,
+    rgba(56, 189, 248, 0.10) 55%,
+    transparent 80%);
+}
+.zone-blue:hover,
+.zone-blue:focus {
+  background: radial-gradient(ellipse at center,
+    rgba(56, 189, 248, 0.52) 0%,
+    rgba(56, 189, 248, 0.22) 55%,
+    transparent 80%);
+}
+
+/* Green — NOMINAL / chest, arms, hips-left, legs-left */
+.zone-green {
+  color: var(--status-nominal);
+  background: radial-gradient(ellipse at center,
+    rgba(52, 211, 153, 0.26) 0%,
+    rgba(52, 211, 153, 0.10) 55%,
+    transparent 80%);
+}
+.zone-green:hover,
+.zone-green:focus {
+  background: radial-gradient(ellipse at center,
+    rgba(52, 211, 153, 0.52) 0%,
+    rgba(52, 211, 153, 0.22) 55%,
+    transparent 80%);
+}
+
+/* Yellow — ELEVATED / abdomen, hips-right, legs-right */
+.zone-yellow {
+  color: var(--status-elevated);
+  background: radial-gradient(ellipse at center,
+    rgba(251, 191, 36, 0.26) 0%,
+    rgba(251, 191, 36, 0.10) 55%,
+    transparent 80%);
+}
+.zone-yellow:hover,
+.zone-yellow:focus {
+  background: radial-gradient(ellipse at center,
+    rgba(251, 191, 36, 0.52) 0%,
+    rgba(251, 191, 36, 0.22) 55%,
+    transparent 80%);
+}
+
+/* Orange — WARNING / knees */
+.zone-orange {
+  color: var(--status-warning);
+  background: radial-gradient(ellipse at center,
+    rgba(251, 146, 60, 0.30) 0%,
+    rgba(251, 146, 60, 0.12) 55%,
+    transparent 80%);
+}
+.zone-orange:hover,
+.zone-orange:focus {
+  background: radial-gradient(ellipse at center,
+    rgba(251, 146, 60, 0.56) 0%,
+    rgba(251, 146, 60, 0.24) 55%,
+    transparent 80%);
+}
